@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PetCareConnect.Data;
@@ -11,9 +12,11 @@ using PetCareConnect.Data;
 namespace PetCareConnect.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260326142722_AddOrder")]
+    partial class AddOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,40 +248,6 @@ namespace PetCareConnect.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("PetCareConnect.Models.Appointment", b =>
-                {
-                    b.Property<int>("AppointmentID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AppointmentID"));
-
-                    b.Property<DateTime>("AppointmentDateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("PetID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ServiceType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserID")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("AppointmentID");
-
-                    b.HasIndex("PetID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Appointments");
-                });
-
             modelBuilder.Entity("PetCareConnect.Models.Notification", b =>
                 {
                     b.Property<int>("NotificationID")
@@ -333,35 +302,6 @@ namespace PetCareConnect.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("PetCareConnect.Models.OrderItem", b =>
-                {
-                    b.Property<int>("OrderItemID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("OrderItemID"));
-
-                    b.Property<int>("OrderID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("OrderItemID");
-
-                    b.HasIndex("OrderID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("OrderItems");
-                });
-
             modelBuilder.Entity("PetCareConnect.Models.Pet", b =>
                 {
                     b.Property<int>("PetID")
@@ -396,45 +336,6 @@ namespace PetCareConnect.Migrations
                     b.HasIndex("OwnerID");
 
                     b.ToTable("Pets");
-                });
-
-            modelBuilder.Entity("PetCareConnect.Models.Prescription", b =>
-                {
-                    b.Property<int>("PrescriptionID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PrescriptionID"));
-
-                    b.Property<string>("ApprovedByUserID")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Dosage")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ExpirationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("MedicationName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("PetID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RefillStatus")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("PrescriptionID");
-
-                    b.HasIndex("ApprovedByUserID");
-
-                    b.HasIndex("PetID");
-
-                    b.ToTable("Prescriptions");
                 });
 
             modelBuilder.Entity("PetCareConnect.Models.Product", b =>
@@ -515,25 +416,6 @@ namespace PetCareConnect.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PetCareConnect.Models.Appointment", b =>
-                {
-                    b.HasOne("PetCareConnect.Models.Pet", "Pet")
-                        .WithMany()
-                        .HasForeignKey("PetID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PetCareConnect.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pet");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("PetCareConnect.Models.Notification", b =>
                 {
                     b.HasOne("PetCareConnect.Models.ApplicationUser", "User")
@@ -556,25 +438,6 @@ namespace PetCareConnect.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PetCareConnect.Models.OrderItem", b =>
-                {
-                    b.HasOne("PetCareConnect.Models.Order", "Order")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("OrderID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PetCareConnect.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("PetCareConnect.Models.Pet", b =>
                 {
                     b.HasOne("PetCareConnect.Models.ApplicationUser", "Owner")
@@ -584,30 +447,6 @@ namespace PetCareConnect.Migrations
                         .IsRequired();
 
                     b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("PetCareConnect.Models.Prescription", b =>
-                {
-                    b.HasOne("PetCareConnect.Models.ApplicationUser", "ApprovedByUser")
-                        .WithMany()
-                        .HasForeignKey("ApprovedByUserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PetCareConnect.Models.Pet", "Pet")
-                        .WithMany()
-                        .HasForeignKey("PetID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ApprovedByUser");
-
-                    b.Navigation("Pet");
-                });
-
-            modelBuilder.Entity("PetCareConnect.Models.Order", b =>
-                {
-                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }

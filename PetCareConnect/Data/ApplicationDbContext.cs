@@ -24,4 +24,46 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
         });
     }
+
+    public DbSet<Product> Products 
+    { 
+        get; 
+        set; 
+    }
+
+    public DbSet<Pet> Pets 
+    { 
+        get; 
+        set;
+    }
+
+    public DbSet<Notification> Notifications 
+    { 
+        get; 
+        set;
+    }
+
+    public DbSet<Order> Orders 
+    { 
+        get; 
+        set;
+    }
+
+    public DbSet<Appointment> Appointments 
+    { 
+        get; 
+        set;
+    }
+
+    public DbSet<Prescription> Prescriptions 
+    { 
+        get; 
+        set;
+    }
+
+    public DbSet<OrderItem> OrderItems 
+    { 
+        get; 
+        set;
+    }
 }

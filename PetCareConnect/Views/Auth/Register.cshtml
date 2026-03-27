@@ -1,0 +1,60 @@
+@model PetCareConnect.Models.DTOs.RegisterDto
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="register-container">
+    <h2>Create an Account</h2>
+    <form asp-controller="Auth" asp-action="Register" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="form-group">
+            <label asp-for="FirstName">First Name</label>
+            <input asp-for="FirstName" type="text" placeholder="First name" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="LastName">Last Name</label>
+            <input asp-for="LastName" type="text" placeholder="Last name" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email">Email</label>
+            <input asp-for="Email" type="email" placeholder="your@email.com" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Password">Password</label>
+            <input asp-for="Password" type="password" placeholder="Password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Address">Address</label>
+            <input asp-for="Address" type="text" placeholder="Your address" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Role">I am a...</label>
+            <select asp-for="Role">
+                <option value="">-- Select a role --</option>
+                <option value="Pet Owner">Pet Owner</option>
+                <option value="Caregiver">Caregiver</option>
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn-primary">Create Account</button>
+
+        <p class="auth-switch">Already have an account? <a asp-controller="Auth" asp-action="Login">Sign in</a></p>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

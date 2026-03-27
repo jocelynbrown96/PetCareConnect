@@ -7,25 +7,65 @@ using System.Threading.Tasks;
 
 namespace PetCareConnect.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+
         public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
         }
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto model)
+
+        [HttpGet]
+        public IActionResult Login()
         {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginDto model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Invalid email or password. Please try again.");
+                return View(model);
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user, model.Password, isPersistent: false, lockoutOnFailure: false);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("", "Invalid email or password. Please try again.");
+                return View(model);
+            }
+
+            user.LastLogin = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterDto model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
             if (!await _roleManager.RoleExistsAsync(model.Role))
             {
-                return BadRequest($"Role '{model.Role}' does not exist");
+                ModelState.AddModelError("", $"Role '{model.Role}' does not exist.");
+                return View(model);
             }
 
             var user = new ApplicationUser
@@ -40,37 +80,26 @@ namespace PetCareConnect.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
-                return BadRequest(ModelState);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError("", error.Description);
+                return View(model);
+            }
 
             await _userManager.AddToRoleAsync(user, model.Role);
 
-            return Ok(new { message = "User has been successfully registered!" });
+            return RedirectToAction("Login", "Auth");
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto model)
+        [HttpPost]
+        public async Task<IActionResult> Logout()
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
-            {
-                return Unauthorized("Invalid email or password. Please try again");
-            }
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, isPersistent: false, lockoutOnFailure: false);
-            if (!result.Succeeded)
-            {
-                return Unauthorized("Invalid email or password. Please try again");
-            }
-            
-            user.LastLogin = System.DateTime.UtcNow;
-            await _userManager.UpdateAsync(user);
-
-            return Ok("Logged in successfully!");
-
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
 
         [Authorize(Roles = "System Administrator")]
-        [HttpGet("admin-test")]
         public IActionResult AdminTest()
         {
             return Ok("You are an admin!");

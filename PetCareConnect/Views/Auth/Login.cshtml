@@ -4,23 +4,206 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="login-container">
-    <h2>Sign In</h2>
-    <form asp-controller="Auth" asp-action="Login" method="post">
-        <div asp-validation-summary="ModelOnly"></div>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        <div class="form-group">
-            <label asp-for="Email">Email</label>
-            <input asp-for="Email" type="email" />
-            <span asp-validation-for="Email"></span>
-        </div>
+<style>
+    .auth-page {
+        min-height: 100vh;
+        background: var(--cream);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 100px 24px 60px;
+        position: relative;
+        overflow: hidden;
+    }
 
-        <div class="form-group">
-            <label asp-for="Password">Password</label>
-            <input asp-for="Password" type="password" />
-            <span asp-validation-for="Password"></span>
-        </div>
+    .auth-page::before {
+        content: '';
+        position: absolute;
+        top: -200px; right: -200px;
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(74,124,89,0.07) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
 
-        <button type="submit" class="btn-primary">Sign In</button>
-    </form>
+    .auth-page::after {
+        content: '';
+        position: absolute;
+        bottom: -150px; left: -150px;
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(232,168,124,0.07) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .auth-card {
+        background: white;
+        border-radius: 28px;
+        padding: 52px 48px;
+        width: 100%;
+        max-width: 460px;
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 60px rgba(26,26,46,0.08);
+        position: relative;
+        z-index: 1;
+        animation: fadeUp 0.6s ease forwards;
+        margin-top: -100px;
+    }
+
+    .auth-logo {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--ink);
+        text-decoration: none;
+        letter-spacing: -0.02em;
+        display: inline-block;
+        margin-bottom: 32px;
+    }
+
+    .auth-logo span { color: var(--sage); }
+
+    .auth-card h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+    }
+
+    .auth-subtitle {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 36px;
+        line-height: 1.5;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--ink);
+        letter-spacing: 0.01em;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.925rem;
+        color: var(--ink);
+        background: var(--cream);
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+    }
+
+    .form-group input::placeholder {
+        color: #b0aba3;
+    }
+
+    .form-group input:focus {
+        border-color: var(--sage);
+        box-shadow: 0 0 0 3px rgba(74,124,89,0.1);
+        background: white;
+    }
+
+    .text-danger {
+        font-size: 0.78rem;
+        color: #dc2626;
+        margin-top: 2px;
+    }
+
+    .btn-auth {
+        width: 100%;
+        background: var(--sage);
+        color: white;
+        padding: 14px 24px;
+        border-radius: 100px;
+        border: none;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: all 0.25s;
+        box-shadow: 0 4px 20px rgba(74,124,89,0.25);
+        margin-top: 8px;
+    }
+
+    .btn-auth:hover {
+        background: #3d6b4a;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(74,124,89,0.35);
+    }
+
+    .auth-switch {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 0.875rem;
+        color: var(--muted);
+    }
+
+    .auth-switch a {
+        color: var(--sage);
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .auth-switch a:hover { color: #3d6b4a; }
+
+    .auth-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 28px 0;
+    }
+
+    @@media (max-width: 560px) {
+        .auth-card { padding: 36px 24px; }
+    }
+</style>
+
+<div class="auth-page">
+    <div class="auth-card">
+        <a href="/" class="auth-logo">PetCare<span>Connect</span></a>
+
+        <h2>Welcome back</h2>
+        <p class="auth-subtitle">Sign in to manage your pet's health and appointments.</p>
+
+        <form asp-controller="Auth" asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom:16px;"></div>
+
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" type="email" placeholder="jane@email.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" type="password" placeholder="Your password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn-auth">Sign In</button>
+        </form>
+
+        <div class="auth-divider"></div>
+        <p class="auth-switch">Don't have an account? <a asp-controller="Auth" asp-action="Register">Create one free</a></p>
+    </div>
 </div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

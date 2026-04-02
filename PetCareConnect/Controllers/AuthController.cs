@@ -48,7 +48,7 @@ namespace PetCareConnect.Controllers
             user.LastLogin = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Dashboard");
         }
 
         [HttpGet]
@@ -88,8 +88,11 @@ namespace PetCareConnect.Controllers
             }
 
             await _userManager.AddToRoleAsync(user, model.Role);
+            
+            await _signInManager.SignInAsync(user, isPersistent: false);
 
-            return RedirectToAction("Login", "Auth");
+
+            return RedirectToAction("Index", "Dashboard");
         }
 
         [HttpPost]

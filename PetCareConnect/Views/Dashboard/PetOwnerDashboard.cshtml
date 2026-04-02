@@ -1,0 +1,732 @@
+@model PetCareConnect.Models.ViewModels.PetOwnerDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+  /* ─── DASHBOARD BASE ─── */
+  .dashboard {
+    padding: 100px 60px 60px;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  .dashboard-header {
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+
+  .dashboard-greeting {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .dashboard-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .dashboard-title span {
+    font-style: italic;
+    color: #4A7C59;
+  }
+
+  /* ─── BENTO GRID ─── */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
+  }
+
+  .tile {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    padding: 28px;
+    transition: transform 0.25s, box-shadow 0.25s;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(26,26,46,0.08);
+  }
+
+  /* Grid placements */
+  .tile-profile   { grid-column: span 4; }
+  .tile-stats     { grid-column: span 8; }
+  .tile-pets      { grid-column: span 8; }
+  .tile-appt      { grid-column: span 4; }
+  .tile-rx        { grid-column: span 4; }
+  .tile-shop      { grid-column: span 8; }
+
+  /* Staggered animation delays */
+  .tile-profile   { animation-delay: 0.15s; }
+  .tile-stats     { animation-delay: 0.2s; }
+  .tile-pets      { animation-delay: 0.25s; }
+  .tile-appt      { animation-delay: 0.3s; }
+  .tile-rx        { animation-delay: 0.35s; }
+  .tile-shop      { animation-delay: 0.4s; }
+
+  .tile-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6B7280;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tile-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4A7C59;
+    flex-shrink: 0;
+  }
+
+  /* ─── PROFILE TILE ─── */
+  .profile-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4A7C59, #6BA07A);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 16px;
+  }
+
+  .profile-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 4px;
+  }
+
+  .profile-email {
+    font-size: 0.82rem;
+    color: #6B7280;
+    margin-bottom: 16px;
+    word-break: break-all;
+  }
+
+  .profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E0D8;
+  }
+
+  .profile-meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+  }
+
+  .profile-meta-label { color: #6B7280; }
+  .profile-meta-value { font-weight: 500; color: #1A1A2E; }
+
+  .btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 20px;
+    background: rgba(74,124,89,0.08);
+    color: #4A7C59;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-edit:hover { background: rgba(74,124,89,0.15); color: #4A7C59; }
+
+  /* ─── STATS TILE ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    height: calc(100% - 40px);
+  }
+
+  .stat-card {
+    background: #FAF8F4;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .stat-card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  .stat-card-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    line-height: 1;
+  }
+
+  .stat-card-label {
+    font-size: 0.78rem;
+    color: #6B7280;
+    margin-top: 4px;
+  }
+
+  /* ─── PETS TILE ─── */
+  .pets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+
+  .pet-card {
+    background: #FAF8F4;
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+    text-decoration: none;
+  }
+
+  .pet-card:hover {
+    border-color: #4A7C59;
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(74,124,89,0.1);
+  }
+
+  .pet-photo {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(26,26,46,0.1);
+  }
+
+  .pet-avatar-generated {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(26,26,46,0.1);
+  }
+
+  .pet-card-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 2px;
+  }
+
+  .pet-card-breed {
+    font-size: 0.75rem;
+    color: #6B7280;
+  }
+
+  .pet-card-age {
+    display: inline-block;
+    margin-top: 8px;
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .pet-add-card {
+    background: transparent;
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px dashed #E5E0D8;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    gap: 8px;
+  }
+
+  .pet-add-card:hover {
+    border-color: #4A7C59;
+    background: rgba(74,124,89,0.04);
+  }
+
+  .pet-add-icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(74,124,89,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    color: #4A7C59;
+  }
+
+  .pet-add-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4A7C59;
+  }
+
+  /* ─── APPOINTMENTS TILE ─── */
+  .appt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .appt-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px;
+    background: #FAF8F4;
+    border-radius: 12px;
+  }
+
+  .appt-date-box {
+    background: #4A7C59;
+    color: white;
+    border-radius: 10px;
+    padding: 8px 12px;
+    text-align: center;
+    flex-shrink: 0;
+    min-width: 48px;
+  }
+
+  .appt-date-day {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .appt-date-month {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  .appt-info { flex: 1; min-width: 0; }
+
+  .appt-service {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 2px;
+  }
+
+  .appt-pet {
+    font-size: 0.78rem;
+    color: #6B7280;
+  }
+
+  .appt-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 100px;
+    flex-shrink: 0;
+  }
+
+  .status-scheduled { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .status-completed { background: rgba(107,114,128,0.1); color: #6B7280; }
+  .status-canceled  { background: rgba(239,68,68,0.1); color: #EF4444; }
+
+  .appt-empty, .rx-empty {
+    text-align: center;
+    padding: 24px;
+    color: #6B7280;
+    font-size: 0.85rem;
+  }
+
+  .appt-empty span, .rx-empty span { display: block; font-size: 1.8rem; margin-bottom: 8px; }
+
+  .tile-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    background: #1A1A2E;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .tile-action:hover { background: #4A7C59; color: white; transform: translateY(-1px); }
+
+  /* ─── PRESCRIPTIONS TILE ─── */
+  .rx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rx-item {
+    padding: 14px;
+    background: #FAF8F4;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rx-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 2px;
+  }
+
+  .rx-pet {
+    font-size: 0.75rem;
+    color: #6B7280;
+  }
+
+  .rx-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .rx-available { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .rx-requested { background: rgba(245,158,11,0.1); color: #D97706; }
+  .rx-none      { background: rgba(107,114,128,0.1); color: #6B7280; }
+
+  /* ─── SHOP TILE ─── */
+  .tile-shop {
+    background: #1A1A2E;
+    border-color: #1A1A2E;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tile-shop .tile-label { color: rgba(255,255,255,0.5); }
+  .tile-shop .tile-label::before { background: #6BA07A; }
+
+  .shop-blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .shop-blob-1 {
+    width: 300px; height: 300px;
+    top: -100px; right: -80px;
+    background: radial-gradient(circle, rgba(74,124,89,0.25) 0%, transparent 70%);
+  }
+
+  .shop-blob-2 {
+    width: 200px; height: 200px;
+    bottom: -60px; left: 100px;
+    background: radial-gradient(circle, rgba(232,168,124,0.2) 0%, transparent 70%);
+  }
+
+  .shop-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .shop-text h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .shop-text p {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    max-width: 300px;
+  }
+
+  .shop-categories {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .shop-cat {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .shop-cat:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @@media (max-width: 1024px) {
+    .tile-profile, .tile-stats, .tile-pets,
+    .tile-appt, .tile-rx, .tile-shop { grid-column: span 12; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @@media (max-width: 600px) {
+    .dashboard { padding: 90px 20px 40px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .shop-content { flex-direction: column; }
+  }
+</style>
+
+<div class="dashboard">
+
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div class="dashboard-greeting">Welcome back</div>
+    <h1 class="dashboard-title">Hey, <span>@Model.User.FirstName</span> 👋</h1>
+  </div>
+
+  <div class="bento">
+
+    <!-- PROFILE TILE -->
+    <div class="tile tile-profile">
+      <div class="tile-label">Your Profile</div>
+      <div class="profile-avatar">
+        @Model.User.FirstName.Substring(0, 1)@Model.User.LastName.Substring(0, 1)
+      </div>
+      <div class="profile-name">@Model.User.FirstName @Model.User.LastName</div>
+      <div class="profile-email">@Model.User.Email</div>
+      <div class="profile-meta">
+        <div class="profile-meta-row">
+          <span class="profile-meta-label">Address</span>
+          <span class="profile-meta-value">@(string.IsNullOrEmpty(Model.User.Address) ? "Not set" : Model.User.Address)</span>
+        </div>
+        <div class="profile-meta-row">
+          <span class="profile-meta-label">Member since</span>
+          <span class="profile-meta-value">@Model.User.CreatedAt.ToString("MMM yyyy")</span>
+        </div>
+        <div class="profile-meta-row">
+          <span class="profile-meta-label">Last login</span>
+          <span class="profile-meta-value">@(Model.User.LastLogin.HasValue ? Model.User.LastLogin.Value.ToString("MMM d") : "Today")</span>
+        </div>
+      </div>
+      <a href="#" class="btn-edit">✏️ Edit Profile</a>
+    </div>
+
+    <!-- STATS TILE -->
+    <div class="tile tile-stats">
+      <div class="tile-label">Overview</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon">🐾</div>
+          <div>
+            <div class="stat-card-num">@Model.Pets.Count</div>
+            <div class="stat-card-label">Registered Pets</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">📅</div>
+          <div>
+            <div class="stat-card-num">@Model.UpcomingAppointments.Count</div>
+            <div class="stat-card-label">Upcoming Appts</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">💊</div>
+          <div>
+            <div class="stat-card-num">@Model.Prescriptions.Count</div>
+            <div class="stat-card-label">Active Rx</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PETS TILE -->
+    <div class="tile tile-pets">
+      <div class="tile-label">Your Pets</div>
+      <div class="pets-grid">
+        @foreach (var pet in Model.Pets)
+        {
+          <a asp-controller="Pet" asp-action="Details" asp-route-id="@pet.PetID" class="pet-card">
+            @if (!string.IsNullOrEmpty(pet.PhotoUrl))
+            {
+              <img src="@pet.PhotoUrl" alt="@pet.Name" class="pet-photo" />
+            }
+            else
+            {
+              <div class="pet-avatar-generated" style="background: @PetCareConnect.Helpers.PetHelper.GetAvatarColor(pet.Name);">
+                @PetCareConnect.Helpers.PetHelper.GetAvatarEmoji(pet.Breed)
+              </div>
+            }
+            <div class="pet-card-name">@pet.Name</div>
+            <div class="pet-card-breed">@pet.Breed</div>
+            <div class="pet-card-age">@pet.Age yr@(pet.Age == 1 ? "" : "s") old</div>
+          </a>
+        }
+        <a asp-controller="Pet" asp-action="Create" class="pet-add-card">
+          <div class="pet-add-icon">+</div>
+          <div class="pet-add-label">Add a pet</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS TILE -->
+    <div class="tile tile-appt">
+      <div class="tile-label">Upcoming Appointments</div>
+      @if (Model.UpcomingAppointments.Any())
+      {
+        <div class="appt-list">
+          @foreach (var appt in Model.UpcomingAppointments.Take(3))
+          {
+            <div class="appt-item">
+              <div class="appt-date-box">
+                <div class="appt-date-day">@appt.AppointmentDateTime.Day</div>
+                <div class="appt-date-month">@appt.AppointmentDateTime.ToString("MMM")</div>
+              </div>
+              <div class="appt-info">
+                <div class="appt-service">@appt.ServiceType</div>
+                <div class="appt-pet">@appt.Pet.Name</div>
+              </div>
+              <div class="appt-status status-@(appt.Status?.ToLower() ?? "scheduled")">
+                @(appt.Status ?? "Scheduled")
+              </div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="appt-empty">
+          <span>📅</span>
+          No upcoming appointments
+        </div>
+      }
+      <a asp-controller="Appointment" asp-action="Create" class="tile-action">
+        + Book Appointment
+      </a>
+    </div>
+
+    <!-- PRESCRIPTIONS TILE -->
+    <div class="tile tile-rx">
+      <div class="tile-label">Prescriptions</div>
+      @if (Model.Prescriptions.Any())
+      {
+        <div class="rx-list">
+          @foreach (var rx in Model.Prescriptions.Take(4))
+          {
+            <div class="rx-item">
+              <div>
+                <div class="rx-name">@rx.MedicationName</div>
+                <div class="rx-pet">@rx.Pet.Name · @rx.Dosage</div>
+              </div>
+              <div class="rx-badge @GetRxClass(rx.RefillStatus)">@rx.RefillStatus</div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="rx-empty">
+          <span>💊</span>
+          No active prescriptions
+        </div>
+      }
+      <a asp-controller="Prescription" asp-action="Index" class="tile-action">
+        View All
+      </a>
+    </div>
+
+    <!-- SHOP TILE -->
+    <div class="tile tile-shop">
+      <div class="shop-blob shop-blob-1"></div>
+      <div class="shop-blob shop-blob-2"></div>
+      <div class="tile-label">Shop</div>
+      <div class="shop-content">
+        <div class="shop-text">
+          <h3>Everything your<br>pet loves.</h3>
+          <p>Food, treats, toys and more — delivered to your door.</p>
+        </div>
+        <div class="shop-categories">
+          <a asp-controller="Shop" asp-action="Index" asp-route-category="food" class="shop-cat">🍖 Food</a>
+          <a asp-controller="Shop" asp-action="Index" asp-route-category="toys" class="shop-cat">🧸 Toys</a>
+          <a asp-controller="Shop" asp-action="Index" asp-route-category="health" class="shop-cat">🩺 Health</a>
+          <a asp-controller="Shop" asp-action="Index" class="shop-cat">🛒 All Products</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+@functions {
+  string GetRxClass(string status) => status switch {
+    "Refills Available"  => "rx-available",
+    "Refill Requested"   => "rx-requested",
+    _                    => "rx-none"
+  };
+}

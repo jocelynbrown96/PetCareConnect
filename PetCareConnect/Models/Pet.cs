@@ -53,5 +53,10 @@ namespace PetCareConnect.Models
             get; 
             set; 
         }
+        public string? PhotoUrl
+        {
+            get;
+            set;
+        }
     }
 }

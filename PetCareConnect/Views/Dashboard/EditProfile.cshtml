@@ -1,0 +1,362 @@
+@model PetCareConnect.Models.ViewModels.EditProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<style>
+  .edit-page {
+    padding: 100px 60px 60px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .edit-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .edit-back:hover { color: #1A1A2E; }
+
+  .edit-header {
+    margin-bottom: 40px;
+  }
+
+  .edit-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .edit-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .edit-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #E5E0D8;
+    padding: 40px;
+    margin-bottom: 20px;
+  }
+
+  .edit-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  /* ─── PHOTO UPLOAD ─── */
+  .photo-section {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 8px;
+  }
+
+  .photo-preview {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #E5E0D8;
+    flex-shrink: 0;
+  }
+
+  .photo-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4A7C59, #6BA07A);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    border: 3px solid #E5E0D8;
+  }
+
+  .photo-actions { display: flex; flex-direction: column; gap: 8px; }
+
+  .photo-actions p {
+    font-size: 0.8rem;
+    color: #6B7280;
+    margin: 0;
+  }
+
+  .btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(74,124,89,0.08);
+    color: #4A7C59;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+    width: fit-content;
+  }
+
+  .btn-upload:hover { background: rgba(74,124,89,0.15); }
+
+  /* ─── FORM ─── */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  .form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid #E5E0D8;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    color: #1A1A2E;
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #4A7C59;
+    box-shadow: 0 0 0 3px rgba(74,124,89,0.1);
+  }
+
+  .form-hint {
+    font-size: 0.75rem;
+    color: #6B7280;
+    margin-top: 6px;
+  }
+
+  /* ─── ACTIONS ─── */
+  .edit-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+
+  .btn-cancel {
+    background: white;
+    border: 1.5px solid #E5E0D8;
+    padding: 13px 28px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6B7280;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-cancel:hover { border-color: #1A1A2E; color: #1A1A2E; }
+
+  .btn-save {
+    background: #1A1A2E;
+    border: none;
+    padding: 13px 32px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-save:hover { background: #4A7C59; transform: translateY(-1px); }
+
+  .alert-success {
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .alert-error {
+    background: rgba(239,68,68,0.1);
+    color: #EF4444;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  @@media (max-width: 600px) {
+    .edit-page { padding: 90px 20px 40px; }
+    .form-row { grid-template-columns: 1fr; }
+    .edit-card { padding: 24px; }
+    .photo-section { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="edit-page">
+
+  <a asp-controller="Dashboard" asp-action="Index" class="edit-back">← Back to Dashboard</a>
+
+  <div class="edit-header">
+    <div class="edit-label">Account Settings</div>
+    <h1 class="edit-title">Edit Profile</h1>
+  </div>
+
+  @if (TempData["Success"] != null)
+  {
+    <div class="alert-success">✓ @TempData["Success"]</div>
+  }
+
+  @if (TempData["Error"] != null)
+  {
+    <div class="alert-error">@TempData["Error"]</div>
+  }
+
+  <!-- PROFILE PHOTO -->
+  <div class="edit-card">
+    <div class="edit-card-title">Profile Photo</div>
+    <form asp-controller="Dashboard" asp-action="UpdatePhoto" method="post" enctype="multipart/form-data">
+      @Html.AntiForgeryToken()
+      <div class="photo-section">
+        @if (!string.IsNullOrEmpty(Model.ProfilePhotoUrl))
+        {
+          <img src="@Model.ProfilePhotoUrl" alt="Profile" class="photo-preview" id="photoPreview" />
+        }
+        else
+        {
+          <div class="photo-avatar" id="photoAvatar">
+            @Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)
+          </div>
+        }
+        <div class="photo-actions">
+          <label for="photoInput" class="btn-upload">📷 Choose Photo</label>
+          <input type="file" id="photoInput" name="photo" accept="image/*" style="display:none" onchange="previewPhoto(this)" />
+          <p>JPG, PNG or GIF · Max 5MB</p>
+          <button type="submit" class="btn-save" style="margin-top:4px;">Upload Photo</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- PROFILE INFO -->
+  <div class="edit-card">
+    <div class="edit-card-title">Personal Information</div>
+    <form asp-controller="Dashboard" asp-action="UpdateProfile" method="post">
+      @Html.AntiForgeryToken()
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" name="FirstName" class="form-input" value="@Model.FirstName" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" name="LastName" class="form-input" value="@Model.LastName" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="Email" class="form-input" value="@Model.Email" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input type="text" name="Address" class="form-input" value="@Model.Address" />
+      </div>
+      <div class="edit-actions">
+        <a asp-controller="Dashboard" asp-action="Index" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-save">Save Changes</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- PASSWORD -->
+  <div class="edit-card">
+    <div class="edit-card-title">Change Password</div>
+    <form asp-controller="Dashboard" asp-action="UpdatePassword" method="post">
+      @Html.AntiForgeryToken()
+      <div class="form-group">
+        <label class="form-label">Current Password</label>
+        <input type="password" name="CurrentPassword" class="form-input" placeholder="Enter your current password" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" name="NewPassword" class="form-input" placeholder="Min. 6 characters" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" name="ConfirmPassword" class="form-input" placeholder="Repeat new password" required />
+        <div class="form-hint">Must match your new password.</div>
+      </div>
+      <div class="edit-actions">
+        <a asp-controller="Dashboard" asp-action="Index" class="btn-cancel">Cancel</a>
+        <button type="submit" class="btn-save">Update Password</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<script>
+  function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // Show img preview, hide avatar div
+        let preview = document.getElementById('photoPreview');
+        const avatar = document.getElementById('photoAvatar');
+        if (!preview) {
+          preview = document.createElement('img');
+          preview.id = 'photoPreview';
+          preview.className = 'photo-preview';
+          preview.alt = 'Profile';
+          if (avatar) avatar.replaceWith(preview);
+        }
+        preview.src = e.target.result;
+        if (avatar) avatar.style.display = 'none';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>

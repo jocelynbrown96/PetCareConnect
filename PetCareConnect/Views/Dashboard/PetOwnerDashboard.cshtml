@@ -541,9 +541,12 @@
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .shop-content { flex-direction: column; }
   }
+
 </style>
 
 <div class="dashboard">
+  
+  
 
   <!-- HEADER -->
   <div class="dashboard-header">
@@ -556,9 +559,16 @@
     <!-- PROFILE TILE -->
     <div class="tile tile-profile">
       <div class="tile-label">Your Profile</div>
-      <div class="profile-avatar">
-        @Model.User.FirstName.Substring(0, 1)@Model.User.LastName.Substring(0, 1)
-      </div>
+      @if (!string.IsNullOrEmpty(Model.User.ProfilePhotoUrl))
+      {
+        <img src="@Model.User.ProfilePhotoUrl" alt="Profile" class="profile-avatar" style="object-fit:cover;" />
+      }
+      else
+      {
+        <div class="profile-avatar">
+          @Model.User.FirstName.Substring(0, 1)@Model.User.LastName.Substring(0, 1)
+        </div>
+      }
       <div class="profile-name">@Model.User.FirstName @Model.User.LastName</div>
       <div class="profile-email">@Model.User.Email</div>
       <div class="profile-meta">
@@ -575,7 +585,7 @@
           <span class="profile-meta-value">@(Model.User.LastLogin.HasValue ? Model.User.LastLogin.Value.ToString("MMM d") : "Today")</span>
         </div>
       </div>
-      <a href="#" class="btn-edit">✏️ Edit Profile</a>
+      <a asp-controller="Dashboard" asp-action="EditProfile" class="btn-edit">✏️ Edit Profile</a>
     </div>
 
     <!-- STATS TILE -->
@@ -615,7 +625,7 @@
           <a asp-controller="Pet" asp-action="Details" asp-route-id="@pet.PetID" class="pet-card">
             @if (!string.IsNullOrEmpty(pet.PhotoUrl))
             {
-              <img src="@pet.PhotoUrl" alt="@pet.Name" class="pet-photo" />
+              <img src="@pet.PhotoUrl" alt="@pet.Name" class="pet-photo"/>
             }
             else
             {
@@ -722,6 +732,190 @@
 
   </div>
 </div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal" onclick="closeProfileModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-label">Account Settings</div>
+        <h2 class="modal-title">Edit Profile</h2>
+      </div>
+      <button class="modal-close" onclick="closeProfileModal()">&times;</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchTab('profile', this)">Profile</button>
+      <button class="modal-tab" onclick="switchTab('password', this)">Password</button>
+    </div>
+    <!-- PROFILE TAB -->
+    <div class="modal-body" id="tab-profile">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" id="firstName" class="form-input" value="@Model.User.FirstName" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" id="lastName" class="form-input" value="@Model.User.LastName" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="email" class="form-input" value="@Model.User.Email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input type="text" id="address" class="form-input" value="@Model.User.Address" />
+      </div>
+      <div class="modal-toast" id="profile-toast"></div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" onclick="closeProfileModal()">Cancel</button>
+        <button class="btn-modal-save" onclick="saveProfile()">Save Changes</button>
+      </div>
+    </div>
+    <!-- PASSWORD TAB -->
+    <div class="modal-body hidden" id="tab-password">
+      <div class="form-group">
+        <label class="form-label">Current Password</label>
+        <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" id="newPassword" class="form-input" placeholder="Min. 6 characters" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" id="confirmPassword" class="form-input" placeholder="Repeat new password" />
+      </div>
+      <div class="modal-toast" id="password-toast"></div>
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" onclick="closeProfileModal()">Cancel</button>
+        <button class="btn-modal-save" onclick="savePassword()">Update Password</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,26,46,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 24px;
+    width: 100%; max-width: 520px; margin: 24px;
+    box-shadow: 0 24px 80px rgba(26,26,46,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease forwards;
+  }
+  @@keyframes modalSlideIn {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 32px 32px 0; }
+  .modal-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #4A7C59; margin-bottom: 4px; }
+  .modal-title { font-family: "Playfair Display", serif; font-size: 1.6rem; font-weight: 700; color: #1A1A2E; margin: 0; }
+  .modal-close { background: #FAF8F4; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; color: #6B7280; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+  .modal-close:hover { background: #E5E0D8; color: #1A1A2E; }
+  .modal-tabs { display: flex; gap: 4px; padding: 20px 32px 0; border-bottom: 1px solid #E5E0D8; }
+  .modal-tab { background: none; border: none; padding: 10px 16px; font-size: 0.88rem; font-weight: 500; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; font-family: "DM Sans", sans-serif; }
+  .modal-tab.active { color: #1A1A2E; border-bottom-color: #4A7C59; font-weight: 600; }
+  .modal-tab:hover:not(.active) { color: #1A1A2E; }
+  .modal-body { padding: 28px 32px 32px; }
+  .modal-body.hidden { display: none; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { margin-bottom: 18px; }
+  .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: #1A1A2E; margin-bottom: 6px; }
+  .form-input { width: 100%; padding: 12px 16px; border: 1.5px solid #E5E0D8; border-radius: 12px; font-size: 0.9rem; font-family: "DM Sans", sans-serif; color: #1A1A2E; background: white; transition: border-color 0.2s; box-sizing: border-box; }
+  .form-input:focus { outline: none; border-color: #4A7C59; box-shadow: 0 0 0 3px rgba(74,124,89,0.1); }
+  .modal-toast { font-size: 0.85rem; font-weight: 500; padding: 0; border-radius: 10px; margin-bottom: 0; transition: all 0.3s; max-height: 0; overflow: hidden; }
+  .modal-toast.show { padding: 12px 16px; margin-bottom: 16px; max-height: 60px; }
+  .modal-toast.success { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .modal-toast.error { background: rgba(239,68,68,0.1); color: #EF4444; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+  .btn-modal-cancel { background: #FAF8F4; border: none; padding: 12px 24px; border-radius: 100px; font-size: 0.88rem; font-weight: 500; color: #6B7280; cursor: pointer; font-family: "DM Sans", sans-serif; transition: background 0.2s; }
+  .btn-modal-cancel:hover { background: #E5E0D8; color: #1A1A2E; }
+  .btn-modal-save { background: #1A1A2E; border: none; padding: 12px 28px; border-radius: 100px; font-size: 0.88rem; font-weight: 600; color: white; cursor: pointer; font-family: "DM Sans", sans-serif; transition: all 0.2s; }
+  .btn-modal-save:hover { background: #4A7C59; transform: translateY(-1px); }
+  .btn-modal-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+</style>
+
+<script>
+  function openProfileModal() {
+    const overlay = document.getElementById("profileModal");
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeProfileModal(event) {
+    if (event && event.target !== document.getElementById("profileModal")) return;
+    document.getElementById("profileModal").classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  function switchTab(tab, btn) {
+    document.querySelectorAll(".modal-tab").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-profile").classList.toggle("hidden", tab !== "profile");
+    document.getElementById("tab-password").classList.toggle("hidden", tab !== "password");
+  }
+  function showToast(id, message, type) {
+    const toast = document.getElementById(id);
+    toast.textContent = message;
+    toast.className = "modal-toast show " + type;
+    setTimeout(() => { toast.className = "modal-toast"; }, 4000);
+  }
+  async function saveProfile() {
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = "Saving...";
+    const data = {
+      firstName: document.getElementById("firstName").value,
+      lastName:  document.getElementById("lastName").value,
+      email:     document.getElementById("email").value,
+      address:   document.getElementById("address").value
+    };
+    const res = await fetch("/Dashboard/UpdateProfile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "RequestVerificationToken": getToken() },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    showToast("profile-toast", result.message, result.success ? "success" : "error");
+    btn.disabled = false; btn.textContent = "Save Changes";
+    if (result.success) setTimeout(() => location.reload(), 1500);
+  }
+  async function savePassword() {
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = "Updating...";
+    const data = {
+      currentPassword: document.getElementById("currentPassword").value,
+      newPassword:     document.getElementById("newPassword").value,
+      confirmPassword: document.getElementById("confirmPassword").value
+    };
+    const res = await fetch("/Dashboard/UpdatePassword", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "RequestVerificationToken": getToken() },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    showToast("password-toast", result.message, result.success ? "success" : "error");
+    btn.disabled = false; btn.textContent = "Update Password";
+    if (result.success) {
+      document.getElementById("currentPassword").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmPassword").value = "";
+    }
+  }
+  function getToken() {
+    return document.querySelector("input[name='__RequestVerificationToken']")?.value ?? "";
+  }
+</script>
+
 
 @functions {
   string GetRxClass(string status) => status switch {

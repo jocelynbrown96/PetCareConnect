@@ -1,6 +1,17 @@
-﻿namespace PetCareConnect.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace PetCareConnect.Controllers
 {
-    public class DashboardController
+    [Authorize]
+    public class DashboardController : Controller
     {
+        public IActionResult Index()
+        {
+            if (User.IsInRole("Caregiver"))
+                return View("CaregiverDashboard");
+
+            return View("PetOwnerDashboard");
+        }
     }
 }

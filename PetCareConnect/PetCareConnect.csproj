@@ -25,7 +25,6 @@
 
     <ItemGroup>
       <Folder Include="Views\Appointments\" />
-      <Folder Include="Views\Dashboard\" />
       <Folder Include="Views\Shop\" />
       <Folder Include="Views\Prescriptions\" />
     </ItemGroup>

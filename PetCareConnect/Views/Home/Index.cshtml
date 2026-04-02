@@ -2,28 +2,557 @@
     ViewData["Title"] = "Home Page";
 }
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ─── RESET ─── */
+  main { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
 
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
 
-<!-- NAV -->
-<nav class="nav">
-    <a href="/" class="nav-logo">PetCare<span>Connect</span></a>
-    <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#testimonials">Reviews</a>
-        <a asp-controller="Auth" asp-action="Login" class="btn-nav">Login</a>
-    </div>
-</nav>
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 60px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(74,124,89,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+
+  .hero-tag::before {
+    content: '●';
+    font-size: 0.5rem;
+    animation: pulse 2s infinite;
+  }
+
+  @@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.2s;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: #4A7C59;
+  }
+
+  .hero-desc {
+    font-size: 1.1rem;
+    color: #6B7280;
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 40px;
+    font-weight: 400;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.35s;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.5s;
+  }
+
+  .btn-primary {
+    background: #4A7C59;
+    color: white;
+    padding: 16px 36px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.25s;
+    box-shadow: 0 4px 20px rgba(74,124,89,0.3);
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    background: #3d6b4a;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(74,124,89,0.4);
+  }
+
+  .btn-secondary {
+    color: #1A1A2E;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.2s;
+  }
+
+  .btn-secondary:hover { gap: 14px; color: #1A1A2E; }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 56px;
+    padding-top: 40px;
+    border-top: 1px solid #E5E0D8;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.65s;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: #6B7280;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+
+  /* ─── HERO VISUAL ─── */
+  .hero-visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    animation: fadeIn 1s ease forwards 0.4s;
+  }
+
+  .hero-card-main {
+    background: white;
+    border-radius: 28px;
+    padding: 32px;
+    width: 340px;
+    box-shadow: 0 20px 60px rgba(26,26,46,0.1);
+    position: relative;
+    z-index: 2;
+  }
+
+  .pet-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E8A87C, #f0c090);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+
+  .pet-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #1A1A2E;
+  }
+
+  .pet-breed {
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin-bottom: 20px;
+  }
+
+  .pet-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #E5E0D8;
+    font-size: 0.875rem;
+  }
+
+  .pet-detail-row:last-child { border-bottom: none; }
+  .pet-detail-label { color: #6B7280; }
+  .pet-detail-value { font-weight: 500; color: #1A1A2E; }
+
+  .pet-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .floating-card {
+    position: absolute;
+    background: white;
+    border-radius: 16px;
+    padding: 14px 18px;
+    box-shadow: 0 8px 30px rgba(26,26,46,0.1);
+    font-size: 0.8rem;
+    font-weight: 500;
+    z-index: 3;
+    color: #1A1A2E;
+  }
+
+  .floating-card-1 { top: 10px; right: -20px; display: flex; align-items: center; gap: 10px; }
+  .floating-card-2 { bottom: 40px; left: -30px; display: flex; align-items: center; gap: 10px; }
+
+  .fc-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .fc-icon-green { background: rgba(74,124,89,0.1); }
+  .fc-icon-warm { background: rgba(232,168,124,0.15); }
+  .fc-text-small { font-size: 0.7rem; color: #6B7280; font-weight: 400; margin-top: 2px; }
+
+  .bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(74,124,89,0.08), rgba(232,168,124,0.08));
+    z-index: 0;
+  }
+
+  .bg-blob-1 { width: 300px; height: 300px; top: -50px; right: -50px; }
+  .bg-blob-2 { width: 200px; height: 200px; bottom: 0; left: 0; }
+
+  /* ─── FEATURES ─── */
+  .features {
+    width: 100%;
+    padding: 100px 0;
+    background: white;
+    box-sizing: border-box;
+  }
+
+  .features-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+
+  .section-label {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    color: #1A1A2E;
+  }
+
+  .section-sub {
+    text-align: center;
+    color: #6B7280;
+    font-size: 1.05rem;
+    max-width: 500px;
+    margin: 0 auto 64px;
+    line-height: 1.6;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .feature-card {
+    padding: 36px 32px;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(74,124,89,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature-card:hover {
+    border-color: #6BA07A;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(74,124,89,0.12);
+  }
+
+  .feature-card:hover::after { opacity: 1; }
+
+  .feature-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: rgba(74,124,89,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .feature-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #1A1A2E;
+  }
+
+  .feature-desc { color: #6B7280; font-size: 0.9rem; line-height: 1.65; }
+
+  /* ─── TESTIMONIALS ─── */
+  .testimonials {
+    width: 100%;
+    padding: 100px 0;
+    background: #FAF8F4;
+    box-sizing: border-box;
+  }
+
+  .testimonials-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .testimonial-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid #E5E0D8;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(26,26,46,0.07);
+  }
+
+  .stars { color: #F59E0B; font-size: 0.85rem; letter-spacing: 2px; margin-bottom: 16px; }
+
+  .testimonial-text {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #1A1A2E;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  .testimonial-author { display: flex; align-items: center; gap: 12px; }
+
+  .author-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+
+  .author-name { font-weight: 600; font-size: 0.9rem; color: #1A1A2E; }
+  .author-pet { font-size: 0.8rem; color: #6B7280; margin-top: 2px; }
+
+  /* ─── CTA BANNER ─── */
+  .cta-banner-wrap {
+    width: 100%;
+    padding: 0 60px 100px;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+
+  .cta-banner {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #1A1A2E;
+    border-radius: 28px;
+    padding: 70px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    outline: none;
+    box-shadow: none;
+  }
+
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(74,124,89,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .cta-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 200px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(232,168,124,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .cta-text { position: relative; z-index: 1; }
+
+  .cta-text h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .cta-text p { color: rgba(255,255,255,0.6); font-size: 1rem; max-width: 420px; line-height: 1.6; }
+
+  .cta-actions { display: flex; gap: 16px; flex-shrink: 0; position: relative; z-index: 1; }
+
+  .btn-white {
+    background: white;
+    color: #1A1A2E;
+    padding: 16px 36px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.25s;
+    display: inline-block;
+  }
+
+  .btn-white:hover { color: #1A1A2E; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+  .btn-outline-white {
+    border: 1.5px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 16px 36px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.25s;
+    display: inline-block;
+  }
+
+  .btn-outline-white:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); color: white; }
+
+  /* ─── ANIMATIONS ─── */
+  @@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── RESPONSIVE ─── */
+  @@media (max-width: 900px) {
+    .hero { padding: 100px 24px 60px; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .features-inner { padding: 0 24px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .testimonials-inner { padding: 0 24px; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .cta-banner-wrap { padding: 0 24px 60px; }
+    .cta-banner { padding: 40px 32px; flex-direction: column; }
+  }
+</style>
 
 <!-- HERO -->
 <section class="hero">
+  <div class="hero-grid">
     <div class="hero-content">
+        <div class="hero-tag">Trusted by pet owners everywhere</div>
         <h1>Your pet deserves<br><em>exceptional</em> care.</h1>
         <p class="hero-desc">PetCareConnect brings pet owners and trusted caregivers together - making it effortless to book appointments, track health records, and keep your furry family members happy.</p>
         <div class="hero-cta">
-            <a asp-controller="Account" asp-action="Register" class="btn-primary">Get Started Free</a>
-            <a asp-controller="Account" asp-action="Login" class="btn-secondary">Sign in →</a>
+            <a asp-controller="Auth" asp-action="Register" class="btn-primary">Get Started Free</a>
+            <a asp-controller="Auth" asp-action="Login" class="btn-primary">Sign in →</a>
         </div>
         <div class="hero-stats">
             <div>
@@ -44,7 +573,6 @@
     <div class="hero-visual">
         <div class="bg-blob bg-blob-1"></div>
         <div class="bg-blob bg-blob-2"></div>
-
         <div class="hero-card-main">
             <div class="pet-avatar">🐶</div>
             <div class="pet-name">Biscuit</div>
@@ -62,7 +590,6 @@
                 <span class="pet-detail-value">Dr. Sarah M.</span>
             </div>
         </div>
-
         <div class="floating-card floating-card-1">
             <div class="fc-icon fc-icon-green">📅</div>
             <div>
@@ -70,7 +597,6 @@
                 <div class="fc-text-small">Annual checkup · 9:00 AM</div>
             </div>
         </div>
-
         <div class="floating-card floating-card-2">
             <div class="fc-icon fc-icon-warm">💊</div>
             <div>
@@ -79,14 +605,15 @@
             </div>
         </div>
     </div>
+  </div>
 </section>
 
 <!-- FEATURES -->
 <section class="features" id="features">
+    <div class="features-inner">
     <p class="section-label reveal">Why Choose Us</p>
     <h2 class="section-title reveal">Everything your pet needs,<br>in one place.</h2>
     <p class="section-sub reveal">From routine checkups to emergency care, PetCareConnect keeps you connected to the best care for your pet.</p>
-
     <div class="features-grid">
         <div class="feature-card reveal">
             <div class="feature-icon">📋</div>
@@ -111,7 +638,7 @@
         <div class="feature-card reveal">
             <div class="feature-icon">💬</div>
             <div class="feature-title">Direct Messaging</div>
-            <p class="feature-desc">Chat directly with your vet or groomer for quick questions without needing to make a full appointment.</p>
+            <p class="feature-desc">Chat directly with your vet or groomer for quick questions without needing a full appointment.</p>
         </div>
         <div class="feature-card reveal">
             <div class="feature-icon">📍</div>
@@ -119,18 +646,19 @@
             <p class="feature-desc">Discover top-rated pet care professionals near you with transparent reviews and fair pricing.</p>
         </div>
     </div>
+    </div>
 </section>
 
 <!-- TESTIMONIALS -->
 <section class="testimonials" id="testimonials">
+    <div class="testimonials-inner">
     <p class="section-label reveal">Testimonials</p>
     <h2 class="section-title reveal">Pet owners love us.</h2>
-    <p class="section-sub reveal">Don't take our word for it - hear from families who've trusted PetCareConnect.</p>
-
+    <p class="section-sub reveal">Don't take our word for it — hear from families who've trusted PetCareConnect.</p>
     <div class="testimonials-grid">
         <div class="testimonial-card reveal">
             <div class="stars">★★★★★</div>
-            <p class="testimonial-text">"Finally, an app that keeps all of Mango's records in one place. Booking appointments used to be such a hassle - now it takes 30 seconds."</p>
+            <p class="testimonial-text">"Finally, an app that keeps all of Mango's records in one place. Booking appointments used to be such a hassle — now it takes 30 seconds."</p>
             <div class="testimonial-author">
                 <div class="author-avatar" style="background: linear-gradient(135deg, #4A7C59, #6BA07A);">J</div>
                 <div>
@@ -139,7 +667,6 @@
                 </div>
             </div>
         </div>
-
         <div class="testimonial-card reveal">
             <div class="stars">★★★★★</div>
             <p class="testimonial-text">"The reminders for Rocky's flea medication alone are worth it. Our vet also loves that we can share his full history instantly."</p>
@@ -151,7 +678,6 @@
                 </div>
             </div>
         </div>
-
         <div class="testimonial-card reveal">
             <div class="stars">★★★★★</div>
             <p class="testimonial-text">"As a first-time pet owner I was overwhelmed. PetCareConnect made finding a trusted vet easy and gave me confidence in caring for Pebble."</p>
@@ -159,34 +685,42 @@
                 <div class="author-avatar" style="background: linear-gradient(135deg, #6B7ED4, #4A5BBF);">M</div>
                 <div>
                     <div class="author-name">Kim P.</div>
-                    <div class="author-pet">Owner of Pebble 🐰</div>
+                    <div class="author-pet">Owner of Pebble 🐶</div>
                 </div>
             </div>
         </div>
     </div>
+    </div>
 </section>
 
 <!-- CTA BANNER -->
+<div class="cta-banner-wrap">
 <div class="cta-banner reveal">
     <div class="cta-text">
         <h2>Ready to give your pet<br>the best care?</h2>
         <p>Join thousands of pet owners who trust PetCareConnect to keep their companions healthy and happy.</p>
     </div>
     <div class="cta-actions">
-        <a asp-controller="Account" asp-action="Register" class="btn-white">Create Free Account</a>
-        <a asp-controller="Account" asp-action="Login" class="btn-outline-white">Sign In</a>
+        <a asp-controller="Auth" asp-action="Register" class="btn-white">Create Free Account</a>
+        <a asp-controller="Auth" asp-action="Login" class="btn-outline-white">Sign In</a>
     </div>
 </div>
+</div>
 
-
-<script>
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, i) => {
-            if (entry.isIntersecting) {
-                setTimeout(() => entry.target.classList.add('visible'), i * 80);
-            }
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const siblings = Array.from(entry.target.parentElement.querySelectorAll('.reveal:not(.visible)'));
+                        const index = siblings.indexOf(entry.target);
+                        setTimeout(() => entry.target.classList.add('visible'), index * 100);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
         });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-</script>
+    </script>
+}

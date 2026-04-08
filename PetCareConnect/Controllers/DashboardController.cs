@@ -31,7 +31,55 @@ namespace PetCareConnect.Controllers
         public async Task<IActionResult> Index()
         {
             if (User.IsInRole("Clinic Staff"))
-                return View("CaregiverDashboard");
+            {
+                var staff = await _userManager.GetUserAsync(User);
+                if (staff == null) return RedirectToAction("Login", "Auth");
+
+                var today = DateTime.UtcNow.Date;
+
+                var upcomingAppointments = await _db.Appointments
+                    .Include(a => a.Pet).ThenInclude(p => p.Owner)
+                    .Where(a => a.AppointmentDateTime >= DateTime.UtcNow && a.Status == "Scheduled")
+                    .OrderBy(a => a.AppointmentDateTime)
+                    .Take(10)
+                    .ToListAsync();
+
+                var refillRequests = await _db.Prescriptions
+                    .Include(p => p.Pet).ThenInclude(p => p.Owner)
+                    .Where(p => p.RefillStatus == "Refill Requested")
+                    .ToListAsync();
+
+                var pendingOrders = await _db.Orders
+                    .Include(o => o.OrderItems).ThenInclude(oi => oi.Product)
+                    .Include(o => o.User)
+                    .Where(o => o.Status == "Processing" || o.Status == "Ready")
+                    .OrderBy(o => o.OrderDate)
+                    .ToListAsync();
+
+                var allPets = await _db.Pets
+                    .Include(p => p.Owner)
+                    .OrderBy(p => p.Name)
+                    .Take(20)
+                    .ToListAsync();
+
+                var totalPetOwners = await _userManager.GetUsersInRoleAsync("Pet Owner");
+                var todayAppts = await _db.Appointments
+                    .Where(a => a.AppointmentDateTime.Date == today)
+                    .CountAsync();
+
+                var vm = new ClinicStaffDashboardViewModel
+                {
+                    Staff = staff,
+                    UpcomingAppointments = upcomingAppointments,
+                    RefillRequests = refillRequests,
+                    PendingOrders = pendingOrders,
+                    AllPets = allPets,
+                    TotalPetOwners = totalPetOwners.Count,
+                    TotalAppointmentsToday = todayAppts
+                };
+
+                return View("CaregiverDashboard", vm);
+            }
 
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login", "Auth");
@@ -40,7 +88,7 @@ namespace PetCareConnect.Controllers
                 .Where(p => p.OwnerID == user.Id)
                 .ToListAsync();
 
-            var upcomingAppointments = await _db.Appointments
+            var ownerAppointments = await _db.Appointments
                 .Include(a => a.Pet)
                 .Where(a => a.UserID == user.Id && a.AppointmentDateTime >= DateTime.UtcNow)
                 .OrderBy(a => a.AppointmentDateTime)
@@ -57,16 +105,16 @@ namespace PetCareConnect.Controllers
                 .Take(3)
                 .ToListAsync();
 
-            var vm = new PetOwnerDashboardViewModel
+            var ownerVm = new PetOwnerDashboardViewModel
             {
                 User = user,
                 Pets = pets,
-                UpcomingAppointments = upcomingAppointments,
+                UpcomingAppointments = ownerAppointments,
                 Prescriptions = prescriptions,
                 RecentOrders = recentOrders
             };
 
-            return View("PetOwnerDashboard", vm);
+            return View("PetOwnerDashboard", ownerVm);
         }
 
         [HttpGet]
@@ -196,6 +244,105 @@ namespace PetCareConnect.Controllers
 
             TempData["Success"] = "Profile photo updated.";
             return RedirectToAction("EditProfile");
+        }
+        // ─── STAFF: Update Appointment Status ───
+        [HttpPost]
+        [Authorize(Roles = "Clinic Staff")]
+        public async Task<IActionResult> UpdateAppointmentStatus(int id, string status)
+        {
+            var appt = await _db.Appointments.FindAsync(id);
+            if (appt == null) return NotFound();
+
+            appt.Status = status;
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = $"Appointment marked as {status}.";
+            return RedirectToAction("Index");
+        }
+
+        // ─── STAFF: Approve Refill ───
+        [HttpPost]
+        [Authorize(Roles = "Clinic Staff")]
+        public async Task<IActionResult> ApproveRefill(int id)
+        {
+            var rx = await _db.Prescriptions.FindAsync(id);
+            if (rx == null) return NotFound();
+
+            rx.RefillStatus = "No Refills";
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = "Refill approved and dispensed.";
+            return RedirectToAction("Index");
+        }
+
+        // ─── STAFF: Deny Refill ───
+        [HttpPost]
+        [Authorize(Roles = "Clinic Staff")]
+        public async Task<IActionResult> DenyRefill(int id)
+        {
+            var rx = await _db.Prescriptions.FindAsync(id);
+            if (rx == null) return NotFound();
+
+            rx.RefillStatus = "No Refills";
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = "Refill request denied.";
+            return RedirectToAction("Index");
+        }
+
+        // ─── STAFF: Update Order Status ───
+        [HttpPost]
+        [Authorize(Roles = "Clinic Staff")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, string status)
+        {
+            var order = await _db.Orders.FindAsync(id);
+            if (order == null) return NotFound();
+
+            order.Status = status;
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = $"Order #{id:D6} marked as {status}.";
+            return RedirectToAction("Index");
+        }
+
+        // ─── STAFF: Add Prescription GET ───
+        [HttpGet]
+        [Authorize(Roles = "Clinic Staff")]
+        public async Task<IActionResult> AddPrescription()
+        {
+            var pets = await _db.Pets.Include(p => p.Owner).OrderBy(p => p.Name).ToListAsync();
+            var vm = new AddPrescriptionViewModel { AllPets = pets };
+            return View(vm);
+        }
+
+        // ─── STAFF: Add Prescription POST ───
+        [HttpPost]
+        [Authorize(Roles = "Clinic Staff")]
+        public async Task<IActionResult> AddPrescription(AddPrescriptionViewModel model)
+        {
+            var staff = await _userManager.GetUserAsync(User);
+            if (staff == null) return RedirectToAction("Login", "Auth");
+
+            var pet = await _db.Pets.Include(p => p.Owner).FirstOrDefaultAsync(p => p.PetID == model.PetID);
+            if (pet == null) return NotFound();
+
+            var rx = new Prescription
+            {
+                MedicationName = model.MedicationName,
+                Dosage = model.Dosage,
+                ExpirationDate = model.ExpirationDate.ToUniversalTime(),
+                RefillStatus = model.RefillStatus,
+                PetID = pet.PetID,
+                Pet = pet,
+                ApprovedByUserID = staff.Id,
+                ApprovedByUser = staff
+            };
+
+            _db.Prescriptions.Add(rx);
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = $"Prescription added for {pet.Name}.";
+            return RedirectToAction("Index");
         }
     }
 }

@@ -1,5 +1,558 @@
+@model PetCareConnect.Models.ViewModels.ClinicStaffDashboardViewModel
+
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Staff Dashboard";
 }
 
-<h1>Caregiver Dashboard</h1>
+<style>
+  /* ─── DASHBOARD BASE ─── */
+  .dashboard {
+    padding: 100px 60px 60px;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+
+  .dashboard-header {
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .dashboard-greeting {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .dashboard-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .dashboard-title span { font-style: italic; color: #4A7C59; }
+
+  .btn-add-rx {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #4A7C59;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .btn-add-rx:hover { background: #3d6b4a; color: white; transform: translateY(-1px); }
+
+  /* ─── BENTO ─── */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
+  }
+
+  .tile {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    padding: 28px;
+    transition: transform 0.25s, box-shadow 0.25s;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .tile:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(26,26,46,0.08); }
+
+  .tile-stats    { grid-column: span 12; animation-delay: 0.15s; }
+  .tile-appts    { grid-column: span 7;  animation-delay: 0.2s; }
+  .tile-refills  { grid-column: span 5;  animation-delay: 0.25s; }
+  .tile-orders   { grid-column: span 6;  animation-delay: 0.3s; }
+  .tile-patients { grid-column: span 6;  animation-delay: 0.35s; }
+
+  .tile-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6B7280;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tile-label::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4A7C59;
+    flex-shrink: 0;
+  }
+
+  /* ─── STATS ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: #FAF8F4;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stat-icon { font-size: 1.5rem; }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    line-height: 1;
+  }
+
+  .stat-label { font-size: 0.78rem; color: #6B7280; }
+
+  /* ─── APPOINTMENTS ─── */
+  .appt-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .appt-item {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 14px;
+    background: #FAF8F4;
+    border-radius: 12px;
+  }
+
+  .appt-date-box {
+    background: #4A7C59;
+    color: white;
+    border-radius: 10px;
+    padding: 8px 10px;
+    text-align: center;
+    flex-shrink: 0;
+    min-width: 46px;
+  }
+
+  .appt-date-day { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; line-height: 1; }
+  .appt-date-month { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; margin-top: 2px; }
+
+  .appt-info { flex: 1; min-width: 0; }
+  .appt-service { font-size: 0.88rem; font-weight: 600; color: #1A1A2E; }
+  .appt-meta { font-size: 0.75rem; color: #6B7280; margin-top: 2px; }
+
+  .appt-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .btn-status {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-complete { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .btn-complete:hover { background: #4A7C59; color: white; }
+  .btn-cancel-sm { background: rgba(239,68,68,0.1); color: #EF4444; }
+  .btn-cancel-sm:hover { background: #EF4444; color: white; }
+
+  .empty-msg {
+    text-align: center;
+    padding: 28px;
+    color: #6B7280;
+    font-size: 0.85rem;
+  }
+
+  .empty-msg span { display: block; font-size: 1.8rem; margin-bottom: 8px; }
+
+  /* ─── REFILL REQUESTS ─── */
+  .refill-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .refill-item {
+    padding: 14px;
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 12px;
+  }
+
+  .refill-med { font-size: 0.88rem; font-weight: 600; color: #1A1A2E; margin-bottom: 2px; }
+  .refill-meta { font-size: 0.75rem; color: #6B7280; margin-bottom: 10px; }
+
+  .refill-actions { display: flex; gap: 8px; }
+
+  .btn-approve {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    transition: all 0.2s;
+  }
+
+  .btn-approve:hover { background: #4A7C59; color: white; }
+
+  .btn-deny {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    background: rgba(239,68,68,0.08);
+    color: #EF4444;
+    transition: all 0.2s;
+  }
+
+  .btn-deny:hover { background: #EF4444; color: white; }
+
+  /* ─── ORDERS ─── */
+  .order-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .order-item {
+    padding: 14px 16px;
+    background: #FAF8F4;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .order-info { flex: 1; min-width: 0; }
+  .order-id { font-size: 0.88rem; font-weight: 700; color: #1A1A2E; }
+  .order-meta { font-size: 0.75rem; color: #6B7280; margin-top: 2px; }
+  .order-total { font-size: 0.88rem; font-weight: 700; color: #1A1A2E; flex-shrink: 0; }
+
+  .order-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .btn-ready {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    transition: all 0.2s;
+  }
+
+  .btn-ready:hover { background: #4A7C59; color: white; }
+
+  .btn-done {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    background: rgba(107,114,128,0.1);
+    color: #6B7280;
+    transition: all 0.2s;
+  }
+
+  .btn-done:hover { background: #6B7280; color: white; }
+
+  .order-status-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 100px;
+    flex-shrink: 0;
+  }
+
+  .pill-processing { background: rgba(245,158,11,0.1); color: #D97706; }
+  .pill-ready      { background: rgba(74,124,89,0.1); color: #4A7C59; }
+
+  /* ─── PATIENTS ─── */
+  .patient-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .patient-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: #FAF8F4;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .patient-item:hover { background: #EEE9E1; }
+
+  .patient-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #E5E0D8;
+    flex-shrink: 0;
+  }
+
+  .patient-avatar-gen {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: #FAF8F4;
+    border: 2px solid #E5E0D8;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .patient-name { font-size: 0.88rem; font-weight: 600; color: #1A1A2E; }
+  .patient-meta { font-size: 0.75rem; color: #6B7280; margin-top: 1px; }
+  .patient-breed { margin-left: auto; font-size: 0.75rem; color: #6B7280; flex-shrink: 0; }
+
+  .alert-success {
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @@media (max-width: 1024px) {
+    .tile-stats, .tile-appts, .tile-refills,
+    .tile-orders, .tile-patients { grid-column: span 12; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @@media (max-width: 600px) {
+    .dashboard { padding: 90px 20px 40px; }
+    .dashboard-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<div class="dashboard">
+
+  @if (TempData["Success"] != null)
+  {
+    <div class="alert-success">✓ @TempData["Success"]</div>
+  }
+
+  <!-- HEADER -->
+  <div class="dashboard-header">
+    <div>
+      <div class="dashboard-greeting">Clinic Staff</div>
+      <h1 class="dashboard-title">Hey, <span>@Model.Staff.FirstName</span> 👋</h1>
+    </div>
+    <a asp-controller="Dashboard" asp-action="AddPrescription" class="btn-add-rx">+ Add Prescription</a>
+  </div>
+
+  <div class="bento">
+
+    <!-- STATS -->
+    <div class="tile tile-stats">
+      <div class="tile-label">Overview</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-num">@Model.TotalAppointmentsToday</div>
+          <div class="stat-label">Appointments Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-num">@Model.RefillRequests.Count</div>
+          <div class="stat-label">Refill Requests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-num">@Model.PendingOrders.Count</div>
+          <div class="stat-label">Orders to Fulfill</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🐾</div>
+          <div class="stat-num">@Model.TotalPetOwners</div>
+          <div class="stat-label">Registered Owners</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div class="tile tile-appts">
+      <div class="tile-label">Upcoming Appointments</div>
+      @if (Model.UpcomingAppointments.Any())
+      {
+        <div class="appt-list">
+          @foreach (var appt in Model.UpcomingAppointments)
+          {
+            <div class="appt-item">
+              <div class="appt-date-box">
+                <div class="appt-date-day">@appt.AppointmentDateTime.ToLocalTime().Day</div>
+                <div class="appt-date-month">@appt.AppointmentDateTime.ToLocalTime().ToString("MMM")</div>
+              </div>
+              <div class="appt-info">
+                <div class="appt-service">@appt.ServiceType</div>
+                <div class="appt-meta">
+                  @appt.Pet.Name · @appt.Pet.Owner.FirstName @appt.Pet.Owner.LastName ·
+                  @appt.AppointmentDateTime.ToLocalTime().ToString("h:mm tt")
+                </div>
+              </div>
+              <div class="appt-actions">
+                <form asp-controller="Dashboard" asp-action="UpdateAppointmentStatus" method="post" style="display:inline">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="id" value="@appt.AppointmentID" />
+                  <button type="submit" name="status" value="Completed" class="btn-status btn-complete">✓ Done</button>
+                </form>
+                <form asp-controller="Dashboard" asp-action="UpdateAppointmentStatus" method="post" style="display:inline">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="id" value="@appt.AppointmentID" />
+                  <button type="submit" name="status" value="Canceled" class="btn-status btn-cancel-sm">✕</button>
+                </form>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="empty-msg"><span>📅</span>No upcoming appointments</div>
+      }
+    </div>
+
+    <!-- REFILL REQUESTS -->
+    <div class="tile tile-refills">
+      <div class="tile-label">Refill Requests</div>
+      @if (Model.RefillRequests.Any())
+      {
+        <div class="refill-list">
+          @foreach (var rx in Model.RefillRequests)
+          {
+            <div class="refill-item">
+              <div class="refill-med">@rx.MedicationName</div>
+              <div class="refill-meta">@rx.Pet.Name · @rx.Pet.Owner.FirstName @rx.Pet.Owner.LastName · @rx.Dosage</div>
+              <div class="refill-actions">
+                <form asp-controller="Dashboard" asp-action="ApproveRefill" method="post" style="display:inline">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="id" value="@rx.PrescriptionID" />
+                  <button type="submit" class="btn-approve">✓ Approve</button>
+                </form>
+                <form asp-controller="Dashboard" asp-action="DenyRefill" method="post" style="display:inline">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="id" value="@rx.PrescriptionID" />
+                  <button type="submit" class="btn-deny">✕ Deny</button>
+                </form>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="empty-msg"><span>💊</span>No refill requests</div>
+      }
+    </div>
+
+    <!-- ORDERS TO FULFILL -->
+    <div class="tile tile-orders">
+      <div class="tile-label">Orders to Fulfill</div>
+      @if (Model.PendingOrders.Any())
+      {
+        <div class="order-list">
+          @foreach (var order in Model.PendingOrders)
+          {
+            <div class="order-item">
+              <div class="order-info">
+                <div class="order-id">#@order.OrderID.ToString("D6") · @order.User.FirstName @order.User.LastName</div>
+                <div class="order-meta">
+                  @order.OrderItems.Count item@(order.OrderItems.Count == 1 ? "" : "s") ·
+                  @(order.FulfillmentType == "Pickup" ? "🏥 Pickup" : "🚚 Delivery")
+                </div>
+              </div>
+              <div class="order-total">$@order.TotalPrice.ToString("F2")</div>
+              <div class="order-status-pill pill-@order.Status.ToLower()">@order.Status</div>
+              <div class="order-actions">
+                @if (order.Status == "Processing")
+                {
+                  <form asp-controller="Dashboard" asp-action="UpdateOrderStatus" method="post" style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@order.OrderID" />
+                    <button type="submit" name="status" value="Ready" class="btn-ready">Mark Ready</button>
+                  </form>
+                }
+                <form asp-controller="Dashboard" asp-action="UpdateOrderStatus" method="post" style="display:inline">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="id" value="@order.OrderID" />
+                  <button type="submit" name="status" value="Completed" class="btn-done">✓ Complete</button>
+                </form>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="empty-msg"><span>📦</span>No pending orders</div>
+      }
+    </div>
+
+    <!-- PATIENT LIST -->
+    <div class="tile tile-patients">
+      <div class="tile-label">Patient List</div>
+      @if (Model.AllPets.Any())
+      {
+        <div class="patient-list">
+          @foreach (var pet in Model.AllPets)
+          {
+            <a asp-controller="Pet" asp-action="Details" asp-route-id="@pet.PetID" class="patient-item">
+              @if (!string.IsNullOrEmpty(pet.PhotoUrl))
+              {
+                <img src="@pet.PhotoUrl" alt="@pet.Name" class="patient-avatar" />
+              }
+              else
+              {
+                <div class="patient-avatar-gen">@PetCareConnect.Helpers.PetHelper.GetAvatarEmoji(pet.Breed)</div>
+              }
+              <div>
+                <div class="patient-name">@pet.Name</div>
+                <div class="patient-meta">@pet.Owner.FirstName @pet.Owner.LastName</div>
+              </div>
+              <div class="patient-breed">@pet.Breed · @pet.Age yr@(pet.Age == 1 ? "" : "s")</div>
+            </a>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="empty-msg"><span>🐾</span>No patients registered yet</div>
+      }
+    </div>
+
+  </div>
+</div>

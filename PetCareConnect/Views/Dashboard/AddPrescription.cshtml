@@ -1,0 +1,206 @@
+@model PetCareConnect.Models.ViewModels.AddPrescriptionViewModel
+
+@{
+    ViewData["Title"] = "Add Prescription";
+}
+
+<style>
+  .rx-form-page {
+    padding: 100px 60px 60px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .rx-form-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .rx-form-back:hover { color: #1A1A2E; }
+
+  .rx-form-header { margin-bottom: 40px; }
+
+  .rx-form-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .rx-form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .rx-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #E5E0D8;
+    padding: 40px;
+    margin-bottom: 20px;
+  }
+
+  .rx-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  .form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 8px;
+  }
+
+  .form-input, .form-select {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid #E5E0D8;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    color: #1A1A2E;
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #4A7C59;
+    box-shadow: 0 0 0 3px rgba(74,124,89,0.1);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  .btn-cancel {
+    background: white;
+    border: 1.5px solid #E5E0D8;
+    padding: 13px 28px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-cancel:hover { border-color: #1A1A2E; color: #1A1A2E; }
+
+  .btn-save {
+    background: #4A7C59;
+    border: none;
+    padding: 13px 32px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-save:hover { background: #3d6b4a; transform: translateY(-1px); }
+
+  @@media (max-width: 600px) {
+    .rx-form-page { padding: 90px 20px 40px; }
+    .rx-card { padding: 24px; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="rx-form-page">
+
+  <a asp-controller="Dashboard" asp-action="Index" class="rx-form-back">← Back to Dashboard</a>
+
+  <div class="rx-form-header">
+    <div class="rx-form-label">Clinic Staff</div>
+    <h1 class="rx-form-title">Add Prescription 💊</h1>
+  </div>
+
+  <form asp-controller="Dashboard" asp-action="AddPrescription" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="rx-card">
+      <div class="rx-card-title">Prescription Details</div>
+
+      <div class="form-group">
+        <label class="form-label">Patient (Pet)</label>
+        <select name="PetID" class="form-select" required>
+          <option value="">— Select a pet —</option>
+          @foreach (var pet in Model.AllPets)
+          {
+            <option value="@pet.PetID">@pet.Name — @pet.Owner.FirstName @pet.Owner.LastName (@pet.Breed)</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Medication Name</label>
+          <input type="text" name="MedicationName" class="form-input" placeholder="e.g. Amoxicillin" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dosage</label>
+          <input type="text" name="Dosage" class="form-input" placeholder="e.g. 250mg twice daily" required />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Expiration Date</label>
+          <input type="date" name="ExpirationDate" class="form-input"
+                 value="@DateTime.Now.AddMonths(6).ToString("yyyy-MM-dd")" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Refill Status</label>
+          <select name="RefillStatus" class="form-select">
+            @foreach (var option in PetCareConnect.Models.ViewModels.AddPrescriptionViewModel.RefillOptions)
+            {
+              <option value="@option">@option</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a asp-controller="Dashboard" asp-action="Index" class="btn-cancel">Cancel</a>
+      <button type="submit" class="btn-save">Add Prescription</button>
+    </div>
+
+  </form>
+</div>

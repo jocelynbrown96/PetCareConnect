@@ -56,6 +56,7 @@ namespace PetCareConnect.Controllers
                     .OrderBy(o => o.OrderDate)
                     .ToListAsync();
 
+                
                 var allPets = await _db.Pets
                     .Include(p => p.Owner)
                     .OrderBy(p => p.Name)

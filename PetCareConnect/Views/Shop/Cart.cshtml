@@ -1,0 +1,334 @@
+@model PetCareConnect.Models.ViewModels.CartViewModel
+
+@{
+    ViewData["Title"] = "Your Cart";
+}
+
+<style>
+  .cart-page {
+    padding: 100px 60px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .cart-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .cart-back:hover { color: #1A1A2E; }
+
+  .cart-header { margin-bottom: 32px; }
+
+  .cart-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .cart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .cart-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* ─── ITEMS ─── */
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .cart-item {
+    background: white;
+    border-radius: 18px;
+    border: 1px solid #E5E0D8;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .cart-item-emoji {
+    font-size: 2.5rem;
+    width: 60px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .cart-item-info { flex: 1; min-width: 0; }
+
+  .cart-item-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 3px;
+  }
+
+  .cart-item-cat {
+    font-size: 0.75rem;
+    color: #6B7280;
+    margin-bottom: 10px;
+  }
+
+  .cart-item-price { font-size: 0.9rem; font-weight: 600; color: #4A7C59; }
+
+  .cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .qty-form { display: flex; align-items: center; gap: 8px; }
+
+  .qty-input {
+    width: 52px;
+    padding: 8px 10px;
+    border: 1.5px solid #E5E0D8;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    color: #1A1A2E;
+  }
+
+  .qty-input:focus { outline: none; border-color: #4A7C59; }
+
+  .btn-qty {
+    background: #FAF8F4;
+    border: 1px solid #E5E0D8;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-qty:hover { background: #E5E0D8; }
+
+  .btn-remove {
+    background: none;
+    border: none;
+    color: #EF4444;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+    padding: 0;
+  }
+
+  .btn-remove:hover { color: #DC2626; }
+
+  .cart-item-subtotal {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    flex-shrink: 0;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  /* ─── SUMMARY ─── */
+  .cart-summary {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    padding: 28px;
+    position: sticky;
+    top: 100px;
+  }
+
+  .summary-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    margin-bottom: 10px;
+    color: #6B7280;
+  }
+
+  .summary-row.total {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid #E5E0D8;
+    margin-bottom: 20px;
+  }
+
+  .summary-row.total span:last-child { color: #4A7C59; }
+
+  .btn-checkout {
+    display: block;
+    width: 100%;
+    background: #1A1A2E;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-checkout:hover { background: #4A7C59; color: white; transform: translateY(-1px); }
+
+  .continue-link {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 0.82rem;
+    color: #6B7280;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .continue-link:hover { color: #1A1A2E; }
+
+  .cart-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+  }
+
+  .cart-empty-icon { font-size: 3.5rem; margin-bottom: 16px; }
+  .cart-empty-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+  .cart-empty-sub { font-size: 0.88rem; color: #6B7280; margin-bottom: 24px; }
+
+  .btn-shop {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1A1A2E;
+    color: white;
+    padding: 13px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-shop:hover { background: #4A7C59; color: white; }
+
+  @@media (max-width: 768px) {
+    .cart-page { padding: 90px 20px 40px; }
+    .cart-layout { grid-template-columns: 1fr; }
+    .cart-item { flex-wrap: wrap; }
+    .cart-summary { position: static; }
+  }
+</style>
+
+<div class="cart-page">
+
+  <a asp-controller="Shop" asp-action="Index" class="cart-back">← Continue Shopping</a>
+
+  <div class="cart-header">
+    <div class="cart-label">Your Cart</div>
+    <h1 class="cart-title">🛒 Cart (@Model.ItemCount item@(Model.ItemCount == 1 ? "" : "s"))</h1>
+  </div>
+
+  @if (!Model.Items.Any())
+  {
+    <div class="cart-empty">
+      <div class="cart-empty-icon">🛒</div>
+      <div class="cart-empty-title">Your cart is empty</div>
+      <div class="cart-empty-sub">Add some products for your furry friend!</div>
+      <a asp-controller="Shop" asp-action="Index" class="btn-shop">Browse Products</a>
+    </div>
+  }
+  else
+  {
+    <div class="cart-layout">
+      <div class="cart-items">
+        @foreach (var item in Model.Items)
+        {
+          <div class="cart-item">
+            <div class="cart-item-emoji">@(item.ImageEmoji ?? "📦")</div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">@item.Name</div>
+              <div class="cart-item-cat">@item.Category</div>
+              <div class="cart-item-price">$@item.UnitPrice.ToString("F2") each</div>
+            </div>
+            <div class="cart-item-controls">
+              <form asp-controller="Shop" asp-action="UpdateCart" method="post" class="qty-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="productId" value="@item.ProductId" />
+                <button type="submit" name="quantity" value="@(item.Quantity - 1)" class="btn-qty">−</button>
+                <input type="number" name="quantity" value="@item.Quantity" min="0" class="qty-input"
+                       onchange="this.form.submit()" />
+                <button type="submit" name="quantity" value="@(item.Quantity + 1)" class="btn-qty">+</button>
+              </form>
+              <form asp-controller="Shop" asp-action="RemoveFromCart" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="productId" value="@item.ProductId" />
+                <button type="submit" class="btn-remove">Remove</button>
+              </form>
+            </div>
+            <div class="cart-item-subtotal">$@item.Subtotal.ToString("F2")</div>
+          </div>
+        }
+      </div>
+
+      <div class="cart-summary">
+        <div class="summary-title">Order Summary</div>
+        @foreach (var item in Model.Items)
+        {
+          <div class="summary-row">
+            <span>@item.Name × @item.Quantity</span>
+            <span>$@item.Subtotal.ToString("F2")</span>
+          </div>
+        }
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>$@Model.Total.ToString("F2")</span>
+        </div>
+        <a asp-controller="Shop" asp-action="Checkout" class="btn-checkout">Checkout →</a>
+        <a asp-controller="Shop" asp-action="Index" class="continue-link">← Continue shopping</a>
+      </div>
+    </div>
+  }
+
+</div>

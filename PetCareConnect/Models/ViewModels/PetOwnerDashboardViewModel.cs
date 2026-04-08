@@ -8,5 +8,6 @@ namespace PetCareConnect.Models.ViewModels
         public List<Pet> Pets { get; set; } = new();
         public List<Appointment> UpcomingAppointments { get; set; } = new();
         public List<Prescription> Prescriptions { get; set; } = new();
+        public List<Order> RecentOrders { get; set; } = new();
     }
 }

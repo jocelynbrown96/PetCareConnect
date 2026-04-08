@@ -31,5 +31,8 @@
                 get; 
                 set;
             }
+        public string Category { get; set; } = "General"; // Food, Toys, Health, General
+
+        public string? ImageEmoji { get; set; } // e.g. "🦴" "🐟" "💊" — no image uploads needed
     }
 }

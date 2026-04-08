@@ -1,0 +1,332 @@
+@model PetCareConnect.Models.Prescription
+
+@{
+    ViewData["Title"] = Model.MedicationName;
+    var isExpired = Model.ExpirationDate < DateTime.UtcNow;
+}
+
+<style>
+  .rx-detail-page {
+    padding: 100px 60px 60px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .rx-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .rx-detail-back:hover { color: #1A1A2E; }
+
+  .rx-detail-header { margin-bottom: 32px; }
+
+  .rx-detail-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .rx-detail-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+  }
+
+  .rx-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .rx-available { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .rx-requested { background: rgba(245,158,11,0.1); color: #D97706; }
+  .rx-none      { background: rgba(107,114,128,0.1); color: #6B7280; }
+  .rx-expired   { background: rgba(239,68,68,0.1); color: #EF4444; }
+
+  .rx-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #E5E0D8;
+    padding: 36px;
+    margin-bottom: 20px;
+  }
+
+  .rx-card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rx-card-title::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4A7C59;
+  }
+
+  .rx-detail-rows { display: flex; flex-direction: column; gap: 16px; }
+
+  .rx-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .rx-detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .rx-detail-row-label { color: #6B7280; font-weight: 500; }
+  .rx-detail-row-value { font-weight: 600; color: #1A1A2E; }
+
+  .pet-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .pet-inline-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #E5E0D8;
+  }
+
+  .pet-inline-emoji {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #FAF8F4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+
+  /* ─── REFILL BANNER ─── */
+  .refill-banner {
+    border-radius: 20px;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .refill-banner-available { background: rgba(74,124,89,0.08); border: 1.5px solid rgba(74,124,89,0.2); }
+  .refill-banner-requested  { background: rgba(245,158,11,0.08); border: 1.5px solid rgba(245,158,11,0.2); }
+  .refill-banner-none       { background: #FAF8F4; border: 1.5px solid #E5E0D8; }
+  .refill-banner-expired    { background: rgba(239,68,68,0.06); border: 1.5px solid rgba(239,68,68,0.2); }
+
+  .refill-banner-icon { font-size: 2rem; flex-shrink: 0; }
+
+  .refill-banner-text h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 4px;
+  }
+
+  .refill-banner-text p { font-size: 0.82rem; color: #6B7280; margin: 0; }
+
+  .btn-refill {
+    background: #4A7C59;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .btn-refill:hover { background: #3d6b4a; transform: translateY(-1px); }
+
+  .rx-actions { margin-top: 8px; }
+
+  .btn-back {
+    background: #1A1A2E;
+    color: white;
+    padding: 13px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-back:hover { background: #4A7C59; color: white; transform: translateY(-1px); }
+
+  .alert-success {
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .alert-error {
+    background: rgba(239,68,68,0.1);
+    color: #EF4444;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  @@media (max-width: 600px) {
+    .rx-detail-page { padding: 90px 20px 40px; }
+    .rx-card { padding: 24px; }
+    .refill-banner { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="rx-detail-page">
+
+  <a asp-controller="Prescription" asp-action="Index" class="rx-detail-back">← Back to Prescriptions</a>
+
+  @if (TempData["Success"] != null)
+  {
+    <div class="alert-success">✓ @TempData["Success"]</div>
+  }
+
+  @if (TempData["Error"] != null)
+  {
+    <div class="alert-error">@TempData["Error"]</div>
+  }
+
+  <div class="rx-detail-header">
+    <div class="rx-detail-label">Prescription</div>
+    <h1 class="rx-detail-title">@Model.MedicationName</h1>
+    @{
+      var pillClass = isExpired ? "rx-expired" : Model.RefillStatus switch {
+        "Refills Available" => "rx-available",
+        "Refill Requested"  => "rx-requested",
+        _                   => "rx-none"
+      };
+      var pillText = isExpired ? "Expired" : Model.RefillStatus;
+    }
+    <div class="rx-status-pill @pillClass">@pillText</div>
+  </div>
+
+  <!-- REFILL BANNER -->
+  @if (!isExpired)
+  {
+    if (Model.RefillStatus == "Refills Available")
+    {
+      <div class="refill-banner refill-banner-available">
+        <div class="refill-banner-icon">💊</div>
+        <div class="refill-banner-text">
+          <h3>Refill available</h3>
+          <p>Request a refill and your vet will process it shortly.</p>
+        </div>
+        <form asp-controller="Prescription" asp-action="RequestRefill" asp-route-id="@Model.PrescriptionID" method="post">
+          @Html.AntiForgeryToken()
+          <button type="submit" class="btn-refill">Request Refill</button>
+        </form>
+      </div>
+    }
+    else if (Model.RefillStatus == "Refill Requested")
+    {
+      <div class="refill-banner refill-banner-requested">
+        <div class="refill-banner-icon">⏳</div>
+        <div class="refill-banner-text">
+          <h3>Refill requested</h3>
+          <p>Your request is being reviewed. You'll be notified when it's ready.</p>
+        </div>
+      </div>
+    }
+    else
+    {
+      <div class="refill-banner refill-banner-none">
+        <div class="refill-banner-icon">🚫</div>
+        <div class="refill-banner-text">
+          <h3>No refills available</h3>
+          <p>Contact your vet to discuss renewing this prescription.</p>
+        </div>
+      </div>
+    }
+  }
+  else
+  {
+    <div class="refill-banner refill-banner-expired">
+      <div class="refill-banner-icon">⚠️</div>
+      <div class="refill-banner-text">
+        <h3>Prescription expired</h3>
+        <p>This prescription expired on @Model.ExpirationDate.ToString("MMM d, yyyy"). Contact your vet.</p>
+      </div>
+    </div>
+  }
+
+  <!-- DETAILS CARD -->
+  <div class="rx-card">
+    <div class="rx-card-title">Prescription Details</div>
+    <div class="rx-detail-rows">
+      <div class="rx-detail-row">
+        <span class="rx-detail-row-label">Medication</span>
+        <span class="rx-detail-row-value">@Model.MedicationName</span>
+      </div>
+      <div class="rx-detail-row">
+        <span class="rx-detail-row-label">Dosage</span>
+        <span class="rx-detail-row-value">@Model.Dosage</span>
+      </div>
+      <div class="rx-detail-row">
+        <span class="rx-detail-row-label">Expiration Date</span>
+        <span class="rx-detail-row-value" style="color: @(isExpired ? "#EF4444" : "#1A1A2E")">
+          @Model.ExpirationDate.ToString("MMMM d, yyyy")
+        </span>
+      </div>
+      <div class="rx-detail-row">
+        <span class="rx-detail-row-label">Pet</span>
+        <a asp-controller="Pet" asp-action="Details" asp-route-id="@Model.PetID" class="pet-inline">
+          @if (!string.IsNullOrEmpty(Model.Pet.PhotoUrl))
+          {
+            <img src="@Model.Pet.PhotoUrl" alt="@Model.Pet.Name" class="pet-inline-avatar" />
+          }
+          else
+          {
+            <div class="pet-inline-emoji">@PetCareConnect.Helpers.PetHelper.GetAvatarEmoji(Model.Pet.Breed)</div>
+          }
+          <span class="rx-detail-row-value">@Model.Pet.Name</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="rx-actions">
+    <a asp-controller="Prescription" asp-action="Index" class="btn-back">Back to Prescriptions</a>
+  </div>
+
+</div>

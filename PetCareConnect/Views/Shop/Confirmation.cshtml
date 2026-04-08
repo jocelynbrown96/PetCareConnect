@@ -1,0 +1,255 @@
+@model PetCareConnect.Models.Order
+
+@{
+    ViewData["Title"] = "Order Confirmed";
+}
+
+<style>
+  .confirm-page {
+    padding: 100px 60px 60px;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .confirm-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: pop 0.5s ease;
+  }
+
+  @@keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .confirm-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 10px;
+  }
+
+  .confirm-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .confirm-sub {
+    font-size: 0.95rem;
+    color: #6B7280;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .confirm-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #E5E0D8;
+    padding: 32px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+
+  .confirm-card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .confirm-card-title::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4A7C59;
+  }
+
+  .confirm-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    padding: 10px 0;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .confirm-row:last-child { border-bottom: none; }
+  .confirm-row-label { color: #6B7280; }
+  .confirm-row-value { font-weight: 600; color: #1A1A2E; }
+
+  .order-item-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #E5E0D8;
+    font-size: 0.9rem;
+  }
+
+  .order-item-row:last-child { border-bottom: none; }
+  .order-item-emoji { font-size: 1.4rem; }
+  .order-item-name { flex: 1; font-weight: 600; color: #1A1A2E; }
+  .order-item-qty { color: #6B7280; font-size: 0.82rem; }
+  .order-item-price { font-weight: 700; color: #1A1A2E; }
+
+  .confirm-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    margin-top: 4px;
+    border-top: 2px solid #1A1A2E;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .confirm-total span:last-child { color: #4A7C59; }
+
+  .confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-receipt {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #4A7C59;
+    color: white;
+    padding: 13px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-receipt:hover { background: #3d6b4a; color: white; transform: translateY(-1px); }
+
+  .btn-dashboard {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    color: #1A1A2E;
+    padding: 13px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1.5px solid #E5E0D8;
+    transition: all 0.2s;
+  }
+
+  .btn-dashboard:hover { border-color: #1A1A2E; transform: translateY(-1px); }
+
+  .btn-shop-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1A1A2E;
+    color: white;
+    padding: 13px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-shop-more:hover { background: #4A7C59; color: white; transform: translateY(-1px); }
+
+  @@media (max-width: 600px) {
+    .confirm-page { padding: 90px 20px 40px; }
+    .confirm-card { padding: 20px; }
+  }
+</style>
+
+<div class="confirm-page">
+
+  <div class="confirm-icon">🎉</div>
+  <div class="confirm-label">Order Confirmed</div>
+  <h1 class="confirm-title">You're all set!</h1>
+  <p class="confirm-sub">
+    Your order #@Model.OrderID.ToString("D6") has been placed successfully.<br />
+    @if (Model.FulfillmentType == "Pickup")
+    {
+      <span>Head to <strong>@Model.PickupLocation?.Split('(')[0].Trim()</strong> to pick it up when ready.</span>
+    }
+    else
+    {
+      <span>Your order will be delivered to your registered address.</span>
+    }
+  </p>
+
+  <!-- ORDER DETAILS -->
+  <div class="confirm-card">
+    <div class="confirm-card-title">Order Details</div>
+    <div class="confirm-row">
+      <span class="confirm-row-label">Order Number</span>
+      <span class="confirm-row-value">#@Model.OrderID.ToString("D6")</span>
+    </div>
+    <div class="confirm-row">
+      <span class="confirm-row-label">Date</span>
+      <span class="confirm-row-value">@Model.OrderDate.ToLocalTime().ToString("MMMM d, yyyy")</span>
+    </div>
+    <div class="confirm-row">
+      <span class="confirm-row-label">Fulfillment</span>
+      <span class="confirm-row-value">@Model.FulfillmentType</span>
+    </div>
+    @if (Model.FulfillmentType == "Pickup" && !string.IsNullOrEmpty(Model.PickupLocation))
+    {
+      <div class="confirm-row">
+        <span class="confirm-row-label">Pickup Location</span>
+        <span class="confirm-row-value" style="font-size:0.82rem;max-width:280px;text-align:right;">@Model.PickupLocation</span>
+      </div>
+    }
+    <div class="confirm-row">
+      <span class="confirm-row-label">Status</span>
+      <span class="confirm-row-value" style="color:#4A7C59;">@Model.Status</span>
+    </div>
+  </div>
+
+  <!-- ITEMS -->
+  <div class="confirm-card">
+    <div class="confirm-card-title">Items Ordered</div>
+    @foreach (var item in Model.OrderItems)
+    {
+      <div class="order-item-row">
+        <div class="order-item-emoji">@(item.Product.ImageEmoji ?? "📦")</div>
+        <div class="order-item-name">@item.Product.Name</div>
+        <div class="order-item-qty">× @item.Quantity</div>
+        <div class="order-item-price">$@((item.UnitPrice * item.Quantity).ToString("F2"))</div>
+      </div>
+    }
+    <div class="confirm-total">
+      <span>Total</span>
+      <span>$@Model.TotalPrice.ToString("F2")</span>
+    </div>
+  </div>
+
+  <div class="confirm-actions">
+    <a asp-controller="Shop" asp-action="Receipt" asp-route-id="@Model.OrderID" class="btn-receipt">
+      📄 Download Receipt
+    </a>
+    <a asp-controller="Shop" asp-action="Index" class="btn-shop-more">🛒 Shop More</a>
+    <a asp-controller="Dashboard" asp-action="Index" class="btn-dashboard">Dashboard</a>
+  </div>
+
+</div>

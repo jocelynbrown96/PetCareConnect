@@ -1,0 +1,316 @@
+@model PetCareConnect.Models.ViewModels.ShopIndexViewModel
+
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<style>
+  .shop-page {
+    padding: 100px 60px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .shop-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 20px;
+  }
+
+  .shop-header-left {}
+
+  .shop-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .shop-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .cart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #1A1A2E;
+    color: white;
+    padding: 13px 24px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .cart-btn:hover { background: #4A7C59; color: white; transform: translateY(-1px); }
+
+  .cart-count {
+    background: #4A7C59;
+    color: white;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  /* ─── TABS ─── */
+  .category-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .category-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1.5px solid #E5E0D8;
+    color: #6B7280;
+    background: white;
+  }
+
+  .category-tab:hover { border-color: #4A7C59; color: #4A7C59; }
+  .category-tab.active { background: #1A1A2E; border-color: #1A1A2E; color: white; }
+
+  /* ─── PRODUCT GRID ─── */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    overflow: hidden;
+    transition: all 0.25s;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(26,26,46,0.08);
+    border-color: #6BA07A;
+  }
+
+  .product-img {
+    background: #FAF8F4;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .product-body { padding: 20px; }
+
+  .product-category {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 6px;
+  }
+
+  .product-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .product-desc {
+    font-size: 0.8rem;
+    color: #6B7280;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .product-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .product-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1A1A2E;
+  }
+
+  .product-price span { font-size: 0.8rem; font-weight: 400; color: #6B7280; font-family: 'DM Sans', sans-serif; }
+
+  .btn-add {
+    background: #4A7C59;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-add:hover { background: #3d6b4a; transform: translateY(-1px); }
+
+  .out-of-stock {
+    font-size: 0.78rem;
+    color: #EF4444;
+    font-weight: 500;
+  }
+
+  .product-stock {
+    font-size: 0.72rem;
+    color: #6B7280;
+    margin-top: 4px;
+  }
+
+  .alert-success {
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    grid-column: 1 / -1;
+  }
+
+  .empty-state-icon { font-size: 3rem; margin-bottom: 16px; }
+  .empty-state-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: #1A1A2E; }
+
+  @@media (max-width: 600px) {
+    .shop-page { padding: 90px 20px 40px; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+    .shop-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="shop-page">
+
+  @if (TempData["Success"] != null)
+  {
+    <div class="alert-success">✓ @TempData["Success"]</div>
+  }
+
+  <div class="shop-header">
+    <div class="shop-header-left">
+      <div class="shop-label">Pet Store</div>
+      <h1 class="shop-title">Shop 🛒</h1>
+    </div>
+    <a asp-controller="Shop" asp-action="Cart" class="cart-btn">
+      🛒 Cart
+      @if (Model.CartCount > 0)
+      {
+        <div class="cart-count">@Model.CartCount</div>
+      }
+    </a>
+  </div>
+
+  <!-- CATEGORY TABS -->
+  <div class="category-tabs">
+    <a asp-controller="Shop" asp-action="Index" class="category-tab @(Model.ActiveCategory == "All" ? "active" : "")">
+      All Products
+    </a>
+    @foreach (var cat in Model.Categories)
+    {
+      var icon = cat switch {
+        "Food"   => "🍖",
+        "Toys"   => "🧸",
+        "Health" => "💊",
+        _        => "📦"
+      };
+      <a asp-controller="Shop" asp-action="Index" asp-route-category="@cat"
+         class="category-tab @(Model.ActiveCategory == cat ? "active" : "")">
+        @icon @cat
+      </a>
+    }
+  </div>
+
+  <!-- PRODUCT GRID -->
+  <div class="product-grid">
+    @if (!Model.Products.Any())
+    {
+      <div class="empty-state">
+        <div class="empty-state-icon">📦</div>
+        <div class="empty-state-title">No products in this category yet.</div>
+      </div>
+    }
+    @foreach (var product in Model.Products)
+    {
+      <div class="product-card">
+        <div class="product-img">@(product.ImageEmoji ?? "📦")</div>
+        <div class="product-body">
+          <div class="product-category">@product.Category</div>
+          <div class="product-name">@product.Name</div>
+          <div class="product-desc">@product.Description</div>
+          <div class="product-footer">
+            <div>
+              <div class="product-price">$@product.Price.ToString("F2")</div>
+              @if (product.StockQuantity > 0)
+              {
+                <div class="product-stock">@product.StockQuantity in stock</div>
+              }
+            </div>
+            @if (product.StockQuantity > 0)
+            {
+              <form asp-controller="Shop" asp-action="AddToCart" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="productId" value="@product.ProductId" />
+                <input type="hidden" name="quantity" value="1" />
+                <input type="hidden" name="returnCategory" value="@Model.ActiveCategory" />
+                <button type="submit" class="btn-add">+ Add</button>
+              </form>
+            }
+            else
+            {
+              <span class="out-of-stock">Out of stock</span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

@@ -1,0 +1,242 @@
+@model List<PetCareConnect.Models.Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<style>
+  .orders-page {
+    padding: 100px 60px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .orders-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .orders-back:hover { color: #1A1A2E; }
+
+  .orders-header { margin-bottom: 32px; }
+
+  .orders-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .orders-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .order-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+
+  .order-card:hover { border-color: #6BA07A; box-shadow: 0 4px 20px rgba(74,124,89,0.08); }
+
+  .order-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+
+  .order-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1A1A2E;
+  }
+
+  .order-date { font-size: 0.8rem; color: #6B7280; margin-top: 2px; }
+
+  .order-badges { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+  .order-status {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 100px;
+  }
+
+  .status-processing { background: rgba(245,158,11,0.1); color: #D97706; }
+  .status-ready      { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .status-completed  { background: rgba(107,114,128,0.1); color: #6B7280; }
+
+  .fulfillment-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 100px;
+    background: #FAF8F4;
+    color: #6B7280;
+    border: 1px solid #E5E0D8;
+  }
+
+  .order-items-preview {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .order-item-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FAF8F4;
+    border: 1px solid #E5E0D8;
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    color: #1A1A2E;
+  }
+
+  .order-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid #E5E0D8;
+    gap: 12px;
+  }
+
+  .order-total {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+  }
+
+  .order-actions { display: flex; gap: 10px; }
+
+  .btn-receipt {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(74,124,89,0.08);
+    color: #4A7C59;
+    padding: 8px 16px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+
+  .btn-receipt:hover { background: rgba(74,124,89,0.16); color: #4A7C59; }
+
+  .orders-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+  }
+
+  .orders-empty-icon { font-size: 3rem; margin-bottom: 16px; }
+  .orders-empty-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: #1A1A2E; margin-bottom: 8px; }
+  .orders-empty-sub { font-size: 0.88rem; color: #6B7280; margin-bottom: 24px; }
+
+  .btn-shop {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1A1A2E;
+    color: white;
+    padding: 13px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn-shop:hover { background: #4A7C59; color: white; }
+
+  @@media (max-width: 600px) {
+    .orders-page { padding: 90px 20px 40px; }
+    .order-card { padding: 18px 20px; }
+    .order-card-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="orders-page">
+
+  <a asp-controller="Dashboard" asp-action="Index" class="orders-back">← Back to Dashboard</a>
+
+  <div class="orders-header">
+    <div class="orders-label">Purchase History</div>
+    <h1 class="orders-title">My Orders 📦</h1>
+  </div>
+
+  @if (!Model.Any())
+  {
+    <div class="orders-empty">
+      <div class="orders-empty-icon">📦</div>
+      <div class="orders-empty-title">No orders yet</div>
+      <div class="orders-empty-sub">Your order history will appear here.</div>
+      <a asp-controller="Shop" asp-action="Index" class="btn-shop">Start Shopping</a>
+    </div>
+  }
+  else
+  {
+    @foreach (var order in Model)
+    {
+      <div class="order-card">
+        <div class="order-card-header">
+          <div>
+            <div class="order-number">Order #@order.OrderID.ToString("D6")</div>
+            <div class="order-date">@order.OrderDate.ToLocalTime().ToString("MMMM d, yyyy · h:mm tt")</div>
+          </div>
+          <div class="order-badges">
+            <div class="fulfillment-badge">@(order.FulfillmentType == "Pickup" ? "🏥 Pickup" : "🚚 Delivery")</div>
+            <div class="order-status status-@order.Status.ToLower()">@order.Status</div>
+          </div>
+        </div>
+
+        <div class="order-items-preview">
+          @foreach (var item in order.OrderItems)
+          {
+            <div class="order-item-chip">
+              @(item.Product.ImageEmoji ?? "📦") @item.Product.Name × @item.Quantity
+            </div>
+          }
+        </div>
+
+        <div class="order-card-footer">
+          <div class="order-total">$@order.TotalPrice.ToString("F2")</div>
+          <div class="order-actions">
+            <a asp-controller="Shop" asp-action="Receipt" asp-route-id="@order.OrderID" class="btn-receipt">
+              📄 Receipt
+            </a>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+</div>

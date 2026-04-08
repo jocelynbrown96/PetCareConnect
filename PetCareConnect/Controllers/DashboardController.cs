@@ -51,12 +51,19 @@ namespace PetCareConnect.Controllers
                 .Where(p => p.Pet.OwnerID == user.Id)
                 .ToListAsync();
 
+            var recentOrders = await _db.Orders
+                .Where(o => o.UserID == user.Id)
+                .OrderByDescending(o => o.OrderDate)
+                .Take(3)
+                .ToListAsync();
+
             var vm = new PetOwnerDashboardViewModel
             {
                 User = user,
                 Pets = pets,
                 UpcomingAppointments = upcomingAppointments,
-                Prescriptions = prescriptions
+                Prescriptions = prescriptions,
+                RecentOrders = recentOrders
             };
 
             return View("PetOwnerDashboard", vm);

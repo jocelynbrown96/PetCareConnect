@@ -23,6 +23,7 @@ builder.Services.AddIdentity <ApplicationUser, IdentityRole>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -33,7 +34,10 @@ using (var scope = app.Services.CreateScope())
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
+    var db = services.GetRequiredService<ApplicationDbContext>();
     await DbSeeder.SeedRolesAndAdmin(roleManager, userManager);
+    await DbSeeder.SeedProducts(db);
+    
 }
 
     // Configure the HTTP request pipeline.
@@ -51,6 +55,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseSession();
 
 app.UseRouting();
 app.UseAuthentication();

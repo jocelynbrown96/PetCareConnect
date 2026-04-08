@@ -1,0 +1,315 @@
+@model PetCareConnect.Models.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<style>
+  .checkout-page {
+    padding: 100px 60px 60px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .checkout-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .checkout-back:hover { color: #1A1A2E; }
+
+  .checkout-header { margin-bottom: 32px; }
+
+  .checkout-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .checkout-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .checkout-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+
+  .checkout-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  /* ─── FULFILLMENT ─── */
+  .fulfillment-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .fulfillment-radio { display: none; }
+
+  .fulfillment-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 16px;
+    border-radius: 16px;
+    border: 2px solid #E5E0D8;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .fulfillment-label:hover { border-color: #6BA07A; }
+  .fulfillment-radio:checked + .fulfillment-label { border-color: #4A7C59; background: rgba(74,124,89,0.06); }
+
+  .fulfillment-icon { font-size: 1.8rem; }
+  .fulfillment-name { font-size: 0.9rem; font-weight: 600; color: #1A1A2E; }
+  .fulfillment-desc { font-size: 0.75rem; color: #6B7280; }
+
+  .pickup-locations {
+    display: none;
+  }
+
+  .pickup-locations.show { display: block; }
+
+  .form-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 8px;
+  }
+
+  .form-select {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid #E5E0D8;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    color: #1A1A2E;
+    background: white;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+  }
+
+  .form-select:focus { outline: none; border-color: #4A7C59; }
+
+  /* ─── ORDER REVIEW ─── */
+  .order-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .order-item:last-child { border-bottom: none; }
+
+  .order-item-emoji { font-size: 1.5rem; flex-shrink: 0; }
+
+  .order-item-info { flex: 1; }
+  .order-item-name { font-size: 0.88rem; font-weight: 600; color: #1A1A2E; }
+  .order-item-qty { font-size: 0.75rem; color: #6B7280; }
+  .order-item-price { font-weight: 600; color: #1A1A2E; font-size: 0.9rem; }
+
+  /* ─── SUMMARY ─── */
+  .checkout-summary {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    padding: 28px;
+    position: sticky;
+    top: 100px;
+  }
+
+  .summary-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    margin-bottom: 10px;
+    color: #6B7280;
+  }
+
+  .summary-row.total {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid #E5E0D8;
+    margin-bottom: 20px;
+  }
+
+  .summary-row.total span:last-child { color: #4A7C59; }
+
+  .btn-place-order {
+    display: block;
+    width: 100%;
+    background: #4A7C59;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .btn-place-order:hover { background: #3d6b4a; transform: translateY(-1px); }
+
+  @@media (max-width: 768px) {
+    .checkout-page { padding: 90px 20px 40px; }
+    .checkout-layout { grid-template-columns: 1fr; }
+    .fulfillment-options { grid-template-columns: 1fr 1fr; }
+    .checkout-summary { position: static; }
+  }
+</style>
+
+<div class="checkout-page">
+
+  <a asp-controller="Shop" asp-action="Cart" class="checkout-back">← Back to Cart</a>
+
+  <div class="checkout-header">
+    <div class="checkout-label">Almost there</div>
+    <h1 class="checkout-title">Checkout ✓</h1>
+  </div>
+
+  <form asp-controller="Shop" asp-action="PlaceOrder" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="checkout-layout">
+      <div>
+        <!-- FULFILLMENT -->
+        <div class="checkout-card">
+          <div class="checkout-card-title">How would you like to receive your order?</div>
+
+          <div class="fulfillment-options">
+            <div>
+              <input type="radio" name="FulfillmentType" id="delivery" value="Delivery"
+                     class="fulfillment-radio" checked onchange="togglePickup(this)" />
+              <label for="delivery" class="fulfillment-label">
+                <span class="fulfillment-icon">🚚</span>
+                <span class="fulfillment-name">Delivery</span>
+                <span class="fulfillment-desc">Shipped to your address</span>
+              </label>
+            </div>
+            <div>
+              <input type="radio" name="FulfillmentType" id="pickup" value="Pickup"
+                     class="fulfillment-radio" onchange="togglePickup(this)" />
+              <label for="pickup" class="fulfillment-label">
+                <span class="fulfillment-icon">🏥</span>
+                <span class="fulfillment-name">Clinic Pickup</span>
+                <span class="fulfillment-desc">Pick up at a location</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pickup-locations" id="pickupSection">
+            <label class="form-label">Select a pickup location</label>
+            <select name="PickupLocation" class="form-select">
+              @foreach (var loc in PetCareConnect.Models.ViewModels.CheckoutViewModel.PickupLocations)
+              {
+                <option value="@loc">@loc</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- ORDER REVIEW -->
+        <div class="checkout-card">
+          <div class="checkout-card-title">Order Review</div>
+          @foreach (var item in Model.Items)
+          {
+            <div class="order-item">
+              <div class="order-item-emoji">@(item.ImageEmoji ?? "📦")</div>
+              <div class="order-item-info">
+                <div class="order-item-name">@item.Name</div>
+                <div class="order-item-qty">Qty: @item.Quantity</div>
+              </div>
+              <div class="order-item-price">$@item.Subtotal.ToString("F2")</div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="checkout-summary">
+        <div class="summary-title">Order Total</div>
+        @foreach (var item in Model.Items)
+        {
+          <div class="summary-row">
+            <span>@item.Name × @item.Quantity</span>
+            <span>$@item.Subtotal.ToString("F2")</span>
+          </div>
+        }
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>$@Model.Total.ToString("F2")</span>
+        </div>
+        <button type="submit" class="btn-place-order">Place Order 🐾</button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  function togglePickup(radio) {
+    const section = document.getElementById('pickupSection');
+    section.classList.toggle('show', radio.value === 'Pickup');
+  }
+</script>

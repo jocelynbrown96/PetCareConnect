@@ -1,0 +1,266 @@
+@model PetCareConnect.Models.Appointment
+
+@{
+    ViewData["Title"] = "Appointment Details";
+}
+
+<style>
+  .appt-detail-page {
+    padding: 100px 60px 60px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .appt-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .appt-detail-back:hover { color: #1A1A2E; }
+
+  .appt-detail-header { margin-bottom: 32px; }
+
+  .appt-detail-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 8px;
+  }
+
+  .appt-detail-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+  }
+
+  .appt-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .status-scheduled { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .status-completed  { background: rgba(107,114,128,0.1); color: #6B7280; }
+  .status-canceled   { background: rgba(239,68,68,0.1); color: #EF4444; }
+
+  .appt-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #E5E0D8;
+    padding: 36px;
+    margin-bottom: 20px;
+  }
+
+  .appt-date-hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #E5E0D8;
+  }
+
+  .appt-date-big {
+    background: #1A1A2E;
+    color: white;
+    border-radius: 20px;
+    padding: 16px 22px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .appt-date-big-day {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .appt-date-big-month {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    margin-top: 4px;
+  }
+
+  .appt-date-info h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 4px;
+  }
+
+  .appt-date-info p {
+    font-size: 0.88rem;
+    color: #6B7280;
+    margin: 0;
+  }
+
+  .appt-detail-rows { display: flex; flex-direction: column; gap: 16px; }
+
+  .appt-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+
+  .appt-detail-row-label { color: #6B7280; font-weight: 500; }
+  .appt-detail-row-value { font-weight: 600; color: #1A1A2E; }
+
+  .pet-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .pet-inline-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #E5E0D8;
+  }
+
+  .pet-inline-emoji {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #FAF8F4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+
+  .appt-actions { display: flex; gap: 12px; }
+
+  .btn-back {
+    background: #1A1A2E;
+    color: white;
+    padding: 13px 28px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+
+  .btn-back:hover { background: #4A7C59; color: white; transform: translateY(-1px); }
+
+  .btn-cancel-appt {
+    background: white;
+    color: #EF4444;
+    padding: 13px 28px;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1.5px solid #FCA5A5;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-cancel-appt:hover { background: #FEF2F2; border-color: #EF4444; }
+
+  .alert-success {
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  @@media (max-width: 600px) {
+    .appt-detail-page { padding: 90px 20px 40px; }
+    .appt-card { padding: 24px; }
+    .appt-date-hero { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+
+<div class="appt-detail-page">
+
+  <a asp-controller="Dashboard" asp-action="Index" class="appt-detail-back">← Back to Dashboard</a>
+
+  @if (TempData["Success"] != null)
+  {
+    <div class="alert-success">✓ @TempData["Success"]</div>
+  }
+
+  <div class="appt-detail-header">
+    <div class="appt-detail-label">Appointment</div>
+    <h1 class="appt-detail-title">@Model.ServiceType</h1>
+    <div class="appt-status-pill status-@(Model.Status?.ToLower() ?? "scheduled")">
+      @(Model.Status ?? "Scheduled")
+    </div>
+  </div>
+
+  <div class="appt-card">
+    <div class="appt-date-hero">
+      <div class="appt-date-big">
+        <div class="appt-date-big-day">@Model.AppointmentDateTime.Day</div>
+        <div class="appt-date-big-month">@Model.AppointmentDateTime.ToString("MMM yyyy")</div>
+      </div>
+      <div class="appt-date-info">
+        <h3>@Model.AppointmentDateTime.ToString("dddd")</h3>
+        <p>@Model.AppointmentDateTime.ToString("h:mm tt")</p>
+      </div>
+    </div>
+
+    <div class="appt-detail-rows">
+      <div class="appt-detail-row">
+        <span class="appt-detail-row-label">Pet</span>
+        <div class="pet-inline">
+          @if (!string.IsNullOrEmpty(Model.Pet.PhotoUrl))
+          {
+            <img src="@Model.Pet.PhotoUrl" alt="@Model.Pet.Name" class="pet-inline-avatar" />
+          }
+          else
+          {
+            <div class="pet-inline-emoji">@PetCareConnect.Helpers.PetHelper.GetAvatarEmoji(Model.Pet.Breed)</div>
+          }
+          <span class="appt-detail-row-value">@Model.Pet.Name</span>
+        </div>
+      </div>
+      <div class="appt-detail-row">
+        <span class="appt-detail-row-label">Service</span>
+        <span class="appt-detail-row-value">@Model.ServiceType</span>
+      </div>
+      <div class="appt-detail-row">
+        <span class="appt-detail-row-label">Status</span>
+        <span class="appt-detail-row-value">@(Model.Status ?? "Scheduled")</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="appt-actions">
+    <a asp-controller="Dashboard" asp-action="Index" class="btn-back">Back to Dashboard</a>
+    @if (Model.Status != "Canceled" && Model.Status != "Completed")
+    {
+      <a asp-controller="Appointment" asp-action="Edit" asp-route-id="@Model.AppointmentID" class="btn-back" style="background:#4A7C59;">✏️ Edit</a>
+      <form asp-controller="Appointment" asp-action="Cancel" asp-route-id="@Model.AppointmentID" method="post"
+            onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn-cancel-appt">Cancel Appointment</button>
+      </form>
+    }
+  </div>
+
+</div>

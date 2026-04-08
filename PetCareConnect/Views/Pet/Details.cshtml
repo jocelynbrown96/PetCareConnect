@@ -1,0 +1,410 @@
+@model PetCareConnect.Models.ViewModels.PetDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Pet.Name;
+}
+
+<style>
+  .pet-detail-page {
+    padding: 100px 60px 60px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .pet-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6B7280;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+
+  .pet-detail-back:hover { color: #1A1A2E; }
+
+  /* ─── HERO ─── */
+  .pet-hero {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    margin-bottom: 32px;
+    align-items: start;
+  }
+
+  .pet-hero-photo {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 24px;
+    object-fit: cover;
+    border: 1px solid #E5E0D8;
+  }
+
+  .pet-hero-avatar {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem;
+    border: 1px solid #E5E0D8;
+    background: #FAF8F4;
+  }
+
+  .pet-hero-info { padding: 8px 0; }
+
+  .pet-hero-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 10px;
+  }
+
+  .pet-hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    color: #1A1A2E;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+
+  .pet-hero-breed {
+    font-size: 1rem;
+    color: #6B7280;
+    margin-bottom: 24px;
+  }
+
+  .pet-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .pet-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FAF8F4;
+    border: 1px solid #E5E0D8;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #1A1A2E;
+  }
+
+  .pet-badge-icon { font-size: 1rem; }
+
+  .pet-hero-actions { display: flex; gap: 12px; }
+
+  .btn-edit-pet {
+    background: #1A1A2E;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-edit-pet:hover { background: #4A7C59; color: white; transform: translateY(-1px); }
+
+  .btn-delete-pet {
+    background: white;
+    color: #EF4444;
+    padding: 12px 24px;
+    border-radius: 100px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border: 1.5px solid #FCA5A5;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-delete-pet:hover { background: #FEF2F2; border-color: #EF4444; }
+
+  /* ─── CARDS ─── */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .detail-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    padding: 28px;
+  }
+
+  .detail-card-full { grid-column: span 2; }
+
+  .detail-card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4A7C59;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .detail-card-title::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4A7C59;
+  }
+
+  /* Medical notes */
+  .medical-notes-text {
+    font-size: 0.92rem;
+    color: #1A1A2E;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .medical-notes-empty {
+    font-size: 0.88rem;
+    color: #6B7280;
+    font-style: italic;
+  }
+
+  /* Prescriptions */
+  .rx-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .rx-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: #FAF8F4;
+    border-radius: 12px;
+    gap: 12px;
+  }
+
+  .rx-item-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 2px;
+  }
+
+  .rx-item-dosage { font-size: 0.78rem; color: #6B7280; }
+
+  .rx-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .rx-available { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .rx-requested { background: rgba(245,158,11,0.1); color: #D97706; }
+  .rx-none      { background: rgba(107,114,128,0.1); color: #6B7280; }
+
+  .rx-empty, .appt-empty {
+    text-align: center;
+    padding: 20px;
+    color: #6B7280;
+    font-size: 0.85rem;
+  }
+
+  /* Appointments */
+  .appt-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .appt-item {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 16px;
+    background: #FAF8F4;
+    border-radius: 12px;
+  }
+
+  .appt-date-box {
+    background: #4A7C59;
+    color: white;
+    border-radius: 10px;
+    padding: 6px 10px;
+    text-align: center;
+    flex-shrink: 0;
+    min-width: 44px;
+  }
+
+  .appt-date-day { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; line-height: 1; }
+  .appt-date-month { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; }
+
+  .appt-service { font-size: 0.88rem; font-weight: 600; color: #1A1A2E; }
+  .appt-status-badge {
+    font-size: 0.7rem; font-weight: 600;
+    padding: 3px 10px; border-radius: 100px; margin-left: auto;
+  }
+
+  .status-scheduled { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .status-completed { background: rgba(107,114,128,0.1); color: #6B7280; }
+  .status-canceled  { background: rgba(239,68,68,0.1); color: #EF4444; }
+
+  .alert-success {
+    background: rgba(74,124,89,0.1);
+    color: #4A7C59;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  @@media (max-width: 768px) {
+    .pet-detail-page { padding: 90px 20px 40px; }
+    .pet-hero { grid-template-columns: 1fr; }
+    .pet-hero-avatar, .pet-hero-photo { max-width: 200px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .detail-card-full { grid-column: span 1; }
+  }
+</style>
+
+<div class="pet-detail-page">
+
+  <a asp-controller="Dashboard" asp-action="Index" class="pet-detail-back">← Back to Dashboard</a>
+
+  @if (TempData["Success"] != null)
+  {
+    <div class="alert-success">✓ @TempData["Success"]</div>
+  }
+
+  <!-- HERO -->
+  <div class="pet-hero">
+    @if (!string.IsNullOrEmpty(Model.Pet.PhotoUrl))
+    {
+      <img src="@Model.Pet.PhotoUrl" alt="@Model.Pet.Name" class="pet-hero-photo" />
+    }
+    else
+    {
+      <div class="pet-hero-avatar">
+        @PetCareConnect.Helpers.PetHelper.GetAvatarEmoji(Model.Pet.Breed)
+      </div>
+    }
+
+    <div class="pet-hero-info">
+      <div class="pet-hero-tag">Pet Profile</div>
+      <h1 class="pet-hero-name">@Model.Pet.Name</h1>
+      <div class="pet-hero-breed">@Model.Pet.Breed</div>
+
+      <div class="pet-badges">
+        <div class="pet-badge"><span class="pet-badge-icon">🎂</span> @Model.Pet.Age yr@(Model.Pet.Age == 1 ? "" : "s") old</div>
+        @if (!string.IsNullOrEmpty(Model.Pet.Color))
+        {
+          <div class="pet-badge"><span class="pet-badge-icon">🎨</span> @Model.Pet.Color</div>
+        }
+        <div class="pet-badge"><span class="pet-badge-icon">💊</span> @Model.Prescriptions.Count prescription@(Model.Prescriptions.Count == 1 ? "" : "s")</div>
+      </div>
+
+      <div class="pet-hero-actions">
+        <a asp-controller="Pet" asp-action="Edit" asp-route-id="@Model.Pet.PetID" class="btn-edit-pet">✏️ Edit Profile</a>
+        <form asp-controller="Pet" asp-action="Delete" asp-route-id="@Model.Pet.PetID" method="post"
+              onsubmit="return confirm('Are you sure you want to remove @Model.Pet.Name? This cannot be undone.');">
+          @Html.AntiForgeryToken()
+          <button type="submit" class="btn-delete-pet">🗑 Remove Pet</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL CARDS -->
+  <div class="detail-grid">
+
+    <!-- MEDICAL NOTES -->
+    <div class="detail-card detail-card-full">
+      <div class="detail-card-title">Medical Notes</div>
+      @if (!string.IsNullOrEmpty(Model.Pet.MedicalNotes))
+      {
+        <div class="medical-notes-text">@Model.Pet.MedicalNotes</div>
+      }
+      else
+      {
+        <div class="medical-notes-empty">No medical notes added yet.</div>
+      }
+    </div>
+
+    <!-- PRESCRIPTIONS -->
+    <div class="detail-card">
+      <div class="detail-card-title">Prescriptions</div>
+      @if (Model.Prescriptions.Any())
+      {
+        <div class="rx-list">
+          @foreach (var rx in Model.Prescriptions)
+          {
+            <div class="rx-item">
+              <div>
+                <div class="rx-item-name">@rx.MedicationName</div>
+                <div class="rx-item-dosage">@rx.Dosage · Expires @rx.ExpirationDate.ToString("MMM d, yyyy")</div>
+              </div>
+              <div class="rx-badge @GetRxClass(rx.RefillStatus)">@rx.RefillStatus</div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="rx-empty">No prescriptions on file.</div>
+      }
+    </div>
+
+    <!-- RECENT APPOINTMENTS -->
+    <div class="detail-card">
+      <div class="detail-card-title">Recent Appointments</div>
+      @if (Model.RecentAppointments.Any())
+      {
+        <div class="appt-list">
+          @foreach (var appt in Model.RecentAppointments)
+          {
+            <div class="appt-item">
+              <div class="appt-date-box">
+                <div class="appt-date-day">@appt.AppointmentDateTime.Day</div>
+                <div class="appt-date-month">@appt.AppointmentDateTime.ToString("MMM")</div>
+              </div>
+              <div class="appt-service">@appt.ServiceType</div>
+              <div class="appt-status-badge status-@(appt.Status?.ToLower() ?? "scheduled")">
+                @(appt.Status ?? "Scheduled")
+              </div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div class="appt-empty">No appointments yet.</div>
+      }
+    </div>
+
+  </div>
+</div>
+
+@functions {
+  string GetRxClass(string status) => status switch {
+    "Refills Available" => "rx-available",
+    "Refill Requested"  => "rx-requested",
+    _                   => "rx-none"
+  };
+}

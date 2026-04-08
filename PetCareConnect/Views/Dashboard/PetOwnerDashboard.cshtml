@@ -69,7 +69,8 @@
   .tile-pets      { grid-column: span 8; }
   .tile-appt      { grid-column: span 4; }
   .tile-rx        { grid-column: span 4; }
-  .tile-shop      { grid-column: span 8; }
+  .tile-orders    { grid-column: span 4; }
+  .tile-shop      { grid-column: span 12; }
 
   /* Staggered animation delays */
   .tile-profile   { animation-delay: 0.15s; }
@@ -318,7 +319,11 @@
     padding: 14px;
     background: #FAF8F4;
     border-radius: 12px;
+    text-decoration: none;
+    transition: background 0.2s;
   }
+
+  .appt-item:hover { background: #EEE9E1; }
 
   .appt-date-box {
     background: #4A7C59;
@@ -523,6 +528,51 @@
     transform: translateY(-2px);
   }
 
+  /* ─── ORDERS TILE ─── */
+  .order-dash-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #FAF8F4;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: background 0.2s;
+    margin-bottom: 10px;
+  }
+
+  .order-dash-item:last-child { margin-bottom: 0; }
+  .order-dash-item:hover { background: #EEE9E1; }
+
+  .order-dash-id {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    margin-bottom: 2px;
+  }
+
+  .order-dash-date { font-size: 0.75rem; color: #6B7280; }
+
+  .order-dash-status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .order-dash-total {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1A1A2E;
+    flex-shrink: 0;
+  }
+
+  .status-processing { background: rgba(245,158,11,0.1); color: #D97706; }
+  .status-ready      { background: rgba(74,124,89,0.1); color: #4A7C59; }
+  .status-completed  { background: rgba(107,114,128,0.1); color: #6B7280; }
+
   /* ─── ANIMATIONS ─── */
   @@keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -532,7 +582,7 @@
   /* ─── RESPONSIVE ─── */
   @@media (max-width: 1024px) {
     .tile-profile, .tile-stats, .tile-pets,
-    .tile-appt, .tile-rx, .tile-shop { grid-column: span 12; }
+    .tile-appt, .tile-rx, .tile-orders, .tile-shop { grid-column: span 12; }
     .stats-grid { grid-template-columns: repeat(3, 1fr); }
   }
 
@@ -653,10 +703,10 @@
         <div class="appt-list">
           @foreach (var appt in Model.UpcomingAppointments.Take(3))
           {
-            <div class="appt-item">
+            <a asp-controller="Appointment" asp-action="Details" asp-route-id="@appt.AppointmentID" class="appt-item">
               <div class="appt-date-box">
-                <div class="appt-date-day">@appt.AppointmentDateTime.Day</div>
-                <div class="appt-date-month">@appt.AppointmentDateTime.ToString("MMM")</div>
+                <div class="appt-date-day">@appt.AppointmentDateTime.ToLocalTime().Day</div>
+                <div class="appt-date-month">@appt.AppointmentDateTime.ToLocalTime().ToString("MMM")</div>
               </div>
               <div class="appt-info">
                 <div class="appt-service">@appt.ServiceType</div>
@@ -665,7 +715,7 @@
               <div class="appt-status status-@(appt.Status?.ToLower() ?? "scheduled")">
                 @(appt.Status ?? "Scheduled")
               </div>
-            </div>
+            </a>
           }
         </div>
       }
@@ -711,6 +761,34 @@
       </a>
     </div>
 
+    <!-- ORDERS TILE -->
+    <div class="tile tile-orders">
+      <div class="tile-label">Recent Orders</div>
+      @if (Model.RecentOrders.Any())
+      {
+        @foreach (var order in Model.RecentOrders)
+        {
+          <a asp-controller="Shop" asp-action="Confirmation" asp-route-id="@order.OrderID" class="order-dash-item">
+            <div>
+              <div class="order-dash-id">#@order.OrderID.ToString("D6")</div>
+              <div class="order-dash-date">@order.OrderDate.ToLocalTime().ToString("MMM d")</div>
+            </div>
+            <div class="order-dash-total">$@order.TotalPrice.ToString("F2")</div>
+            <div class="order-dash-status status-@order.Status.ToLower()">@order.Status</div>
+          </a>
+        }
+        <a asp-controller="Shop" asp-action="Orders" class="tile-action" style="margin-top:16px;">View All Orders</a>
+      }
+      else
+      {
+        <div class="appt-empty">
+          <span>📦</span>
+          No orders yet
+        </div>
+        <a asp-controller="Shop" asp-action="Index" class="tile-action">Start Shopping</a>
+      }
+    </div>
+
     <!-- SHOP TILE -->
     <div class="tile tile-shop">
       <div class="shop-blob shop-blob-1"></div>
@@ -722,10 +800,11 @@
           <p>Food, treats, toys and more — delivered to your door.</p>
         </div>
         <div class="shop-categories">
-          <a asp-controller="Shop" asp-action="Index" asp-route-category="food" class="shop-cat">🍖 Food</a>
-          <a asp-controller="Shop" asp-action="Index" asp-route-category="toys" class="shop-cat">🧸 Toys</a>
-          <a asp-controller="Shop" asp-action="Index" asp-route-category="health" class="shop-cat">🩺 Health</a>
+          <a asp-controller="Shop" asp-action="Index" asp-route-category="Food" class="shop-cat">🍖 Food</a>
+          <a asp-controller="Shop" asp-action="Index" asp-route-category="Toys" class="shop-cat">🧸 Toys</a>
+          <a asp-controller="Shop" asp-action="Index" asp-route-category="Health" class="shop-cat">🩺 Health</a>
           <a asp-controller="Shop" asp-action="Index" class="shop-cat">🛒 All Products</a>
+          <a asp-controller="Shop" asp-action="Orders" class="shop-cat">📦 My Orders</a>
         </div>
       </div>
     </div>

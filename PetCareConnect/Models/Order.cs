@@ -40,5 +40,10 @@ namespace PetCareConnect.Models
             get; 
             set;
         }
+        public string FulfillmentType { get; set; } = "Delivery"; // Delivery or Pickup
+
+        public string? PickupLocation { get; set; } // clinic name if pickup
+
+        public string Status { get; set; } = "Processing"; // Processing, Ready, Completed
     }
 }

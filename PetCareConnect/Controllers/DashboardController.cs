@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using PetCareConnect.Data;
 using PetCareConnect.Models;
 using PetCareConnect.Models.ViewModels;
+using PetCareConnect.Services;
 
 namespace PetCareConnect.Controllers
 {
@@ -15,17 +16,20 @@ namespace PetCareConnect.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ApplicationDbContext _db;
         private readonly IWebHostEnvironment _env;
+        private readonly NotificationService _notifService;
 
         public DashboardController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ApplicationDbContext db,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            NotificationService notifService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _db = db;
             _env = env;
+            _notifService = notifService;
         }
 
         public async Task<IActionResult> Index()
@@ -251,11 +255,19 @@ namespace PetCareConnect.Controllers
         [Authorize(Roles = "Clinic Staff")]
         public async Task<IActionResult> UpdateAppointmentStatus(int id, string status)
         {
-            var appt = await _db.Appointments.FindAsync(id);
+            var appt = await _db.Appointments
+                .Include(a => a.Pet).ThenInclude(p => p.Owner)
+                .FirstOrDefaultAsync(a => a.AppointmentID == id);
             if (appt == null) return NotFound();
 
             appt.Status = status;
             await _db.SaveChangesAsync();
+
+            var icon = status == "Completed" ? "✅" : "❌";
+            await _notifService.CreateAsync(
+                appt.UserID, appt.User ?? appt.Pet.Owner,
+                $"{icon} Your {appt.ServiceType} appointment for {appt.Pet.Name} has been marked as {status}."
+            );
 
             TempData["Success"] = $"Appointment marked as {status}.";
             return RedirectToAction("Index");
@@ -266,11 +278,18 @@ namespace PetCareConnect.Controllers
         [Authorize(Roles = "Clinic Staff")]
         public async Task<IActionResult> ApproveRefill(int id)
         {
-            var rx = await _db.Prescriptions.FindAsync(id);
+            var rx = await _db.Prescriptions
+                .Include(p => p.Pet).ThenInclude(p => p.Owner)
+                .FirstOrDefaultAsync(p => p.PrescriptionID == id);
             if (rx == null) return NotFound();
 
             rx.RefillStatus = "No Refills";
             await _db.SaveChangesAsync();
+
+            await _notifService.CreateAsync(
+                rx.Pet.OwnerID, rx.Pet.Owner,
+                $"✅ Your refill for {rx.MedicationName} ({rx.Pet.Name}) has been approved and is ready for pickup."
+            );
 
             TempData["Success"] = "Refill approved and dispensed.";
             return RedirectToAction("Index");
@@ -281,11 +300,18 @@ namespace PetCareConnect.Controllers
         [Authorize(Roles = "Clinic Staff")]
         public async Task<IActionResult> DenyRefill(int id)
         {
-            var rx = await _db.Prescriptions.FindAsync(id);
+            var rx = await _db.Prescriptions
+                .Include(p => p.Pet).ThenInclude(p => p.Owner)
+                .FirstOrDefaultAsync(p => p.PrescriptionID == id);
             if (rx == null) return NotFound();
 
             rx.RefillStatus = "No Refills";
             await _db.SaveChangesAsync();
+
+            await _notifService.CreateAsync(
+                rx.Pet.OwnerID, rx.Pet.Owner,
+                $"❌ Your refill request for {rx.MedicationName} ({rx.Pet.Name}) was denied. Please contact the clinic."
+            );
 
             TempData["Success"] = "Refill request denied.";
             return RedirectToAction("Index");
@@ -296,11 +322,19 @@ namespace PetCareConnect.Controllers
         [Authorize(Roles = "Clinic Staff")]
         public async Task<IActionResult> UpdateOrderStatus(int id, string status)
         {
-            var order = await _db.Orders.FindAsync(id);
+            var order = await _db.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.OrderID == id);
             if (order == null) return NotFound();
 
             order.Status = status;
             await _db.SaveChangesAsync();
+
+            var msg = status == "Ready"
+                ? $"🛍️ Your order #{id:D6} is ready for {(order.FulfillmentType == "Pickup" ? "pickup" : "delivery")}!"
+                : $"✅ Your order #{id:D6} has been completed.";
+
+            await _notifService.CreateAsync(order.UserID, order.User, msg);
 
             TempData["Success"] = $"Order #{id:D6} marked as {status}.";
             return RedirectToAction("Index");
@@ -342,8 +376,18 @@ namespace PetCareConnect.Controllers
             _db.Prescriptions.Add(rx);
             await _db.SaveChangesAsync();
 
+            await _notifService.CreateAsync(
+                pet.OwnerID, pet.Owner,
+                $"💊 A new prescription for {rx.MedicationName} has been added for {pet.Name}."
+            );
+
             TempData["Success"] = $"Prescription added for {pet.Name}.";
             return RedirectToAction("Index");
+            
+            
         }
+        
+        
+        
     }
 }

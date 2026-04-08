@@ -336,7 +336,125 @@
     </form>
   </div>
 
+  <!-- NOTIFICATION PREFERENCES -->
+  <div class="edit-card">
+    <div class="edit-card-title">Notification Preferences</div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <label class="notif-pref-row">
+        <div class="notif-pref-toggle">
+          <input type="checkbox" checked class="notif-checkbox" />
+          <span class="notif-slider"></span>
+        </div>
+        <div class="notif-pref-info">
+          <div class="notif-pref-label">Appointment Reminders</div>
+          <div class="notif-pref-sub">Get emailed 24 hours before an upcoming appointment</div>
+        </div>
+      </label>
+
+      <label class="notif-pref-row">
+        <div class="notif-pref-toggle">
+          <input type="checkbox" checked class="notif-checkbox" />
+          <span class="notif-slider"></span>
+        </div>
+        <div class="notif-pref-info">
+          <div class="notif-pref-label">Prescription Updates</div>
+          <div class="notif-pref-sub">Be notified when a refill is approved or denied</div>
+        </div>
+      </label>
+
+      <label class="notif-pref-row">
+        <div class="notif-pref-toggle">
+          <input type="checkbox" checked class="notif-checkbox" />
+          <span class="notif-slider"></span>
+        </div>
+        <div class="notif-pref-info">
+          <div class="notif-pref-label">Order Status Updates</div>
+          <div class="notif-pref-sub">Receive emails when your order is ready or completed</div>
+        </div>
+      </label>
+
+      <label class="notif-pref-row">
+        <div class="notif-pref-toggle">
+          <input type="checkbox" class="notif-checkbox" />
+          <span class="notif-slider"></span>
+        </div>
+        <div class="notif-pref-info">
+          <div class="notif-pref-label">Promotions & Offers</div>
+          <div class="notif-pref-sub">Occasional deals and new product announcements</div>
+        </div>
+      </label>
+
+    </div>
+  </div>
+
 </div>
+
+<style>
+  .notif-pref-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+
+  .notif-pref-toggle {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .notif-checkbox {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+
+  .notif-slider {
+    display: block;
+    width: 44px;
+    height: 24px;
+    background: #E5E0D8;
+    border-radius: 100px;
+    transition: background 0.2s;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .notif-slider::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+
+  .notif-checkbox:checked + .notif-slider {
+    background: #4A7C59;
+  }
+
+  .notif-checkbox:checked + .notif-slider::after {
+    transform: translateX(20px);
+  }
+
+  .notif-pref-info { flex: 1; }
+
+  .notif-pref-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1A1A2E;
+    margin-bottom: 2px;
+  }
+
+  .notif-pref-sub {
+    font-size: 0.78rem;
+    color: #6B7280;
+  }
+</style>
 
 <script>
   function previewPhoto(input) {

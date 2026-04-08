@@ -27,7 +27,9 @@
     <ItemGroup>
       <Folder Include="Helpers\" />
       <Folder Include="Models\ViewModels\" />
+      <Folder Include="ViewComponents\" />
       <Folder Include="Views\Appointment\" />
+      <Folder Include="Views\Shared\Components\NotificationBell\" />
       <Folder Include="Views\Shop\" />
       <Folder Include="Views\Prescription\" />
     </ItemGroup>

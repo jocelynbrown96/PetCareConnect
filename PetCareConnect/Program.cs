@@ -24,6 +24,7 @@ builder.Services.AddIdentity <ApplicationUser, IdentityRole>(options =>
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddSession();
+builder.Services.AddScoped<PetCareConnect.Services.NotificationService>(); 
 
 var app = builder.Build();
 

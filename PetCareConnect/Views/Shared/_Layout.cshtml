@@ -18,6 +18,7 @@
         @if (User.Identity.IsAuthenticated)
         {
             <a asp-controller="Dashboard" asp-action="Index" class="nav-link-subtle">Dashboard</a>
+            @await Component.InvokeAsync("NotificationBell")
             <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline; margin:0;">
                 <button type="submit" class="btn-nav" style="border:none; cursor:pointer;">Logout</button>
             </form>
@@ -45,6 +46,20 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+
+<script>
+  function toggleNotifDropdown() {
+    const dropdown = document.getElementById('notifDropdown');
+    dropdown.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.notif-bell-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('notifDropdown')?.classList.remove('open');
+    }
+  });
+</script>
+
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

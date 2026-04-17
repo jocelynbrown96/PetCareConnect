@@ -61,7 +61,7 @@ namespace PetCareConnect.Controllers
 
             var appointment = new Appointment
             {
-                AppointmentDateTime = model.AppointmentDateTime,
+                AppointmentDateTime = model.AppointmentDateTime.ToUniversalTime(),
                 ServiceType = model.ServiceType,
                 Status = "Scheduled",
                 PetID = model.PetID,

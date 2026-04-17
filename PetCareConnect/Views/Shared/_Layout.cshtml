@@ -18,7 +18,65 @@
         @if (User.Identity.IsAuthenticated)
         {
             <a asp-controller="Dashboard" asp-action="Index" class="nav-link-subtle">Dashboard</a>
+
+            <!-- MESSAGES -->
+            <div class="msg-wrap">
+              <button class="msg-btn" onclick="toggleMsgDropdown()" id="msgBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span class="msg-badge">3</span>
+              </button>
+              <div class="msg-dropdown" id="msgDropdown">
+                <div class="msg-dropdown-header">
+                  <span class="msg-dropdown-title">Messages</span>
+                  <span class="msg-new-tag">3 new</span>
+                </div>
+                <div class="msg-list">
+                  <div class="msg-item msg-unread">
+                    <div class="msg-avatar" style="background:linear-gradient(135deg,#4A7C59,#6BA07A);">DR</div>
+                    <div class="msg-content">
+                      <div class="msg-name">Dr. Rebecca Chen</div>
+                      <div class="msg-preview">Lorde's bloodwork results are in. Everything looks great! No follow-up needed.</div>
+                      <div class="msg-time">2m ago</div>
+                    </div>
+                    <div class="msg-dot"></div>
+                  </div>
+                  <div class="msg-item msg-unread">
+                    <div class="msg-avatar" style="background:linear-gradient(135deg,#6B7ED4,#4A5BBF);">PCC</div>
+                    <div class="msg-content">
+                      <div class="msg-name">PetCareConnect</div>
+                      <div class="msg-preview">Your appointment reminder: Lorde has a Grooming scheduled for Apr 28 at 9:00 AM.</div>
+                      <div class="msg-time">1h ago</div>
+                    </div>
+                    <div class="msg-dot"></div>
+                  </div>
+                  <div class="msg-item msg-unread">
+                    <div class="msg-avatar" style="background:linear-gradient(135deg,#E8A87C,#d4845a);">DM</div>
+                    <div class="msg-content">
+                      <div class="msg-name">Dr. Marcus Webb</div>
+                      <div class="msg-preview">Hi Jocelyn! Just following up — has Lorde been eating normally since her last visit?</div>
+                      <div class="msg-time">Yesterday</div>
+                    </div>
+                    <div class="msg-dot"></div>
+                  </div>
+                  <div class="msg-item">
+                    <div class="msg-avatar" style="background:linear-gradient(135deg,#4A7C59,#6BA07A);">DR</div>
+                    <div class="msg-content">
+                      <div class="msg-name">Dr. Rebecca Chen</div>
+                      <div class="msg-preview">Amoxicillin prescription for Lorde has been renewed. Pick up at the clinic anytime.</div>
+                      <div class="msg-time">3 days ago</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="msg-footer">
+                  <a href="#">View all messages</a>
+                </div>
+              </div>
+            </div>
+
             @await Component.InvokeAsync("NotificationBell")
+
             <form asp-controller="Auth" asp-action="Logout" method="post" style="display:inline; margin:0;">
                 <button type="submit" class="btn-nav" style="border:none; cursor:pointer;">Logout</button>
             </form>
@@ -51,14 +109,78 @@
   function toggleNotifDropdown() {
     const dropdown = document.getElementById('notifDropdown');
     dropdown.classList.toggle('open');
+    document.getElementById('msgDropdown')?.classList.remove('open');
+  }
+  function toggleMsgDropdown() {
+    const dropdown = document.getElementById('msgDropdown');
+    dropdown.classList.toggle('open');
+    document.getElementById('notifDropdown')?.classList.remove('open');
   }
   document.addEventListener('click', function(e) {
-    const wrap = document.querySelector('.notif-bell-wrap');
-    if (wrap && !wrap.contains(e.target)) {
+    const notifWrap = document.querySelector('.notif-bell-wrap');
+    if (notifWrap && !notifWrap.contains(e.target))
       document.getElementById('notifDropdown')?.classList.remove('open');
-    }
+    const msgWrap = document.querySelector('.msg-wrap');
+    if (msgWrap && !msgWrap.contains(e.target))
+      document.getElementById('msgDropdown')?.classList.remove('open');
   });
 </script>
+
+<style>
+  .msg-wrap { position: relative; }
+  .msg-btn {
+    background: none; border: none; cursor: pointer; color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%;
+    transition: background 0.2s; position: relative;
+  }
+  .msg-btn:hover { background: rgba(26,26,46,0.06); }
+  .msg-badge {
+    position: absolute; top: 4px; right: 4px;
+    background: #4A7C59; color: white;
+    font-size: 0.6rem; font-weight: 700;
+    min-width: 16px; height: 16px; border-radius: 100px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px; border: 2px solid white;
+  }
+  .msg-dropdown {
+    position: absolute; top: calc(100% + 12px); right: 0;
+    width: 360px; background: white; border-radius: 20px;
+    border: 1px solid #E5E0D8;
+    box-shadow: 0 20px 60px rgba(26,26,46,0.12);
+    z-index: 9999; display: none; overflow: hidden;
+  }
+  .msg-dropdown.open { display: block; animation: notifDrop 0.2s ease; }
+  .msg-dropdown-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 12px; border-bottom: 1px solid #E5E0D8;
+  }
+  .msg-dropdown-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #1A1A2E; }
+  .msg-new-tag { background: rgba(74,124,89,0.1); color: #4A7C59; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+  .msg-list { max-height: 360px; overflow-y: auto; }
+  .msg-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 20px; border-bottom: 1px solid #E5E0D8;
+    transition: background 0.15s; position: relative; cursor: pointer;
+  }
+  .msg-item:last-child { border-bottom: none; }
+  .msg-item:hover { background: rgba(26,26,46,0.02); }
+  .msg-unread { background: rgba(74,124,89,0.03); }
+  .msg-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: white;
+    flex-shrink: 0; letter-spacing: 0.02em;
+  }
+  .msg-content { flex: 1; min-width: 0; }
+  .msg-name { font-size: 0.83rem; font-weight: 700; color: #1A1A2E; margin-bottom: 3px; }
+  .msg-preview { font-size: 0.78rem; color: #6B7280; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+  .msg-time { font-size: 0.7rem; color: #9CA3AF; }
+  .msg-dot { width: 8px; height: 8px; border-radius: 50%; background: #4A7C59; flex-shrink: 0; margin-top: 6px; }
+  .msg-footer { padding: 12px 20px; text-align: center; border-top: 1px solid #E5E0D8; }
+  .msg-footer a { font-size: 0.82rem; font-weight: 600; color: #4A7C59; text-decoration: none; transition: color 0.2s; }
+  .msg-footer a:hover { color: #3d6b4a; }
+</style>
 
 @await RenderSectionAsync("Scripts", required: false)
 </body>
